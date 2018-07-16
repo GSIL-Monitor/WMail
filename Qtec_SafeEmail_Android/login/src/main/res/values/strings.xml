@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">login</string>
+    <string name="mail_type">邮箱类别</string>
+    <string name="cancel">取消</string>
+    <string name="complete">完成</string>
+    <string name="qtec_safe_server">量子安全服务器</string>
+    <string name="host_name">域名</string>
+    <string name="recommendation">推荐</string>
+    <string name="receiving_server">收件服务器</string>
+    <string name="sending_server">发件服务器</string>
+    <string name="server">服务器</string>
+    <string name="port">端口</string>
+    <string name="ssl">SSL</string>
+    <string name="encrypt_mail_type">加密邮箱</string>
+    <string name="normal_mail_type">普通邮箱</string>
+    <string name="mail_account">邮箱帐号</string>
+    <string name="password">密码</string>
+    <string name="mail_setting">邮箱设置</string>
+</resources>

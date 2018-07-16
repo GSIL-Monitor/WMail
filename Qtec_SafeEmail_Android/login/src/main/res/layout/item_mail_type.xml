@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="mailType"
+            type="com.gongw.login.model.MailType"/>
+    </data>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/item_height_normal"
+    android:orientation="horizontal"
+    android:paddingStart="26dp"
+    android:paddingEnd="26dp">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_vertical"
+        app:drawable="@{mailType.icon}"/>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="26dp"
+        android:layout_marginLeft="26dp"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textSize="@dimen/text_item_normal"
+        android:textColor="@color/text_black"
+        android:text="@{mailType.text}"/>
+
+</LinearLayout>
+</layout>
