@@ -1,5 +1,8 @@
-apply plugin: 'com.android.library'
-
+if (isModule.toBoolean()) {
+    apply plugin: 'com.android.application'
+} else {
+    apply plugin: 'com.android.library'
+}
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -12,7 +15,18 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        if (isModule.toBoolean()) {
+            applicationId "com.gongw.mail"
+            versionCode 1
+            versionName "1.0"
+        } else {
+            //ARouter
+            javaCompileOptions {
+                annotationProcessorOptions {
+                    arguments = [ moduleName : project.getName() ]
+                }
+            }
+        }
 
     }
 
@@ -23,8 +37,28 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            if (isModule.toBoolean()) {
+                manifest.srcFile 'src/main/module/AndroidManifest.xml'
+            } else {
+                manifest.srcFile 'src/main/AndroidManifest.xml'
+                //集成开发模式下排除debug文件夹中的所有Java文件
+                java {
+                    exclude 'debug/**'
+                }
+            }
+        }
+    }
+
+    dataBinding{
+        enabled = true
+    }
+
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar', "*.aar"])
+    implementation project(':common')
+    compile fileTree(dir: 'libs', include: ['*.jar', "*.aar"])
+    compile 'org.litepal.android:core:2.0.0'
 }

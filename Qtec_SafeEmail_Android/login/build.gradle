@@ -12,7 +12,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         if (isModule.toBoolean()) {
-            applicationId "com.cryallen.login"
+            applicationId "com.gongw.login"
             versionCode 1
             versionName "1.0"
         } else {
