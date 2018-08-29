@@ -5,4 +5,14 @@ package com.gongw.mailcore.message;
  */
 
 public class MessageModel {
+
+    private MessageLocalResource localResource;
+    private MessageNetResource netResource;
+
+    private void getMessages(){
+
+    }
+
+
+
 }
