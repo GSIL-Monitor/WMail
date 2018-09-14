@@ -1,6 +1,5 @@
 package com.gongw.mailcore.setting;
 
-import com.libmailcore.ConnectionType;
 
 /**
  * Created by gongw on 2018/7/16.
@@ -8,9 +7,9 @@ import com.libmailcore.ConnectionType;
 
 public enum ConnectType {
 
-    SSL(ConnectionType.ConnectionTypeTLS),
-    TLS(ConnectionType.ConnectionTypeStartTLS),
-    CLEAR(ConnectionType.ConnectionTypeClear);
+    SSL(1),
+    TLS(2),
+    CLEAR(3);
 
     private int value;
 
@@ -28,7 +27,7 @@ public enum ConnectType {
                 return connectType;
             }
         }
-        throw new RuntimeException("no connect type found："+type);
+        throw new RuntimeException("no checkConnect type found："+type);
     }
 
 }

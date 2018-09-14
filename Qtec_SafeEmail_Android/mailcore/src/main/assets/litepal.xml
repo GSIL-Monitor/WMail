@@ -32,8 +32,10 @@
     	</list>
     -->
     <list>
-        <mapping class="com.libmailcore.IMAPMessage"/>
-        <mapping class="com.libmailcore.IMAPFolder"/>
+        <mapping class="com.gongw.mailcore.account.Account"/>
+        <mapping class="com.gongw.mailcore.folder.LocalFolder"/>
+        <mapping class="com.gongw.mailcore.message.LocalMessage"/>
+        <mapping class="com.gongw.mailcore.part.LocalPart"/>
     </list>
 
     <!--
@@ -46,5 +48,5 @@
         For example:
         <storage value="external" />
     -->
-
+    <storage value="external" />
 </litepal>

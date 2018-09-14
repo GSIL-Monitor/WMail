@@ -1,9 +1,12 @@
 package com.gongw.mailcore.message;
 
-import com.libmailcore.IMAPMessage;
+import com.gongw.mailcore.contact.Contact;
+import com.gongw.mailcore.folder.LocalFolder;
+import com.gongw.mailcore.part.LocalPart;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
-
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,73 +15,223 @@ import java.util.List;
 
 public class LocalMessage extends LitePalSupport {
 
-    private long sequenceNumber;
+    private long id;
 
-    private long uid;
+    @Column(nullable = false)
+    private LocalFolder folder;
 
-    private long size;
+    private boolean expunged;
+
+    private Date receiveDate;
+
+    private Date sentDate;
+
+    private String subject;
 
     private int flags;
 
-    private int originalFlags;
+    private List<Contact> recipientsTo;
 
-    private List<String> customFlags;
+    private List<Contact> recipientsCc;
 
-    private long modSeqValue;
+    private List<Contact> recipientsBcc;
+
+    private List<Contact> from;
+
+    private List<Contact> replyTo;
+
+    private Contact sender;
+
+    @Column(unique = true)
+    private String messageId;
+
+    /**
+     * 邮件回复标记，标识邮件是否已回复
+     */
+    private boolean answered;
+
+    /**
+     * 邮件删除标记，标识邮件是否需要删除
+     */
+    private boolean deleted;
+
+    /**
+     * 草稿邮件标记，标识邮件是否为草稿
+     */
+    private boolean draft;
+
+    /**
+     * 邮件标记，一般指标星
+     */
+    private boolean flagged;
+
+    /**
+     * 新邮件标记，表示邮件是否为新邮件
+     */
+    private boolean recent;
+
+    /**
+     * 邮件阅读标记，标识邮件是否已被阅读
+     */
+    private boolean seen;
+
+    /**
+     * 系统是否支持用户自定义标记，只能检索，不能设置这个属性
+     */
+    private boolean user;
+
+    private List<LocalPart> localParts;
+
+    private int attachmentCount;
+
+    private String uid;
+
+    private long size;
 
     private LocalPart mainPart;
 
-    private List<String> gmailLabels;
+    private String textPlain;
 
-    private long gmailMessageID;
+    private boolean isDecode;
 
-    private long gmailThreadID;
+    private String keyId;
 
-    public LocalMessage(IMAPMessage imapMessage){
-        this.sequenceNumber = imapMessage.sequenceNumber();
-        this.uid = imapMessage.uid();
-        this.size = imapMessage.size();
-        this.flags = imapMessage.flags();
-        this.originalFlags = imapMessage.originalFlags();
-        this.customFlags = imapMessage.customFlags();
-        this.modSeqValue = imapMessage.modSeqValue();
-        this.mainPart = new LocalPart(imapMessage.mainPart());
-        this.gmailLabels = imapMessage.gmailLabels();
-        this.gmailMessageID = imapMessage.gmailMessageID();
-        this.gmailThreadID = imapMessage.gmailThreadID();
+    private int encrypt;
+
+
+    public long getId() {
+        return id;
     }
 
-    public IMAPMessage toImapMessage(){
-        IMAPMessage imapMessage = new IMAPMessage();
-        imapMessage.setSequenceNumber(sequenceNumber);
-        imapMessage.setUid(uid);
-        imapMessage.setSize(size);
-        imapMessage.setFlags(flags);
-        imapMessage.setOriginalFlags(originalFlags);
-        imapMessage.setCustomFlags(customFlags);
-        imapMessage.setModSeqValue(modSeqValue);
-        imapMessage.setMainPart(mainPart.toAbstractPart());
-        imapMessage.setGmailLabels(gmailLabels);
-        imapMessage.setGmailMessageID(gmailMessageID);
-        imapMessage.setGmailThreadID(gmailThreadID);
-        return imapMessage;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public LocalMessage(){}
-
-    public long getSequenceNumber() {
-        return sequenceNumber;
+    public LocalFolder getFolder() {
+        return folder;
     }
 
-    public void setSequenceNumber(long sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
+    public void setFolder(LocalFolder folder) {
+        this.folder = folder;
     }
 
-    public long getUid() {
+    public boolean isExpunged() {
+        return expunged;
+    }
+
+    public void setExpunged(boolean expunged) {
+        this.expunged = expunged;
+    }
+
+    public Date getReceiveDate() {
+        return receiveDate;
+    }
+
+    public void setReceiveDate(Date receiveDate) {
+        this.receiveDate = receiveDate;
+    }
+
+    public Date getSentDate() {
+        return sentDate;
+    }
+
+    public void setSentDate(Date sentDate) {
+        this.sentDate = sentDate;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    public List<Contact> getRecipientsTo() {
+        return recipientsTo;
+    }
+
+    public void setRecipientsTo(List<Contact> recipientsTo) {
+        this.recipientsTo = recipientsTo;
+    }
+
+    public List<Contact> getRecipientsCc() {
+        return recipientsCc;
+    }
+
+    public void setRecipientsCc(List<Contact> recipientsCc) {
+        this.recipientsCc = recipientsCc;
+    }
+
+    public List<Contact> getRecipientsBcc() {
+        return recipientsBcc;
+    }
+
+    public void setRecipientsBcc(List<Contact> recipientsBcc) {
+        this.recipientsBcc = recipientsBcc;
+    }
+
+    public List<Contact> getFrom() {
+        return from;
+    }
+
+    public void setFrom(List<Contact> from) {
+        this.from = from;
+    }
+
+    public List<Contact> getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(List<Contact> replyTo) {
+        this.replyTo = replyTo;
+    }
+
+    public Contact getSender() {
+        return sender;
+    }
+
+    public void setSender(Contact sender) {
+        this.sender = sender;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public List<LocalPart> getLocalParts() {
+        return localParts;
+    }
+
+    public void setLocalParts(List<LocalPart> localParts) {
+        this.localParts = localParts;
+    }
+
+    public int getAttachmentCount() {
+        return attachmentCount;
+    }
+
+    public void setAttachmentCount(int attachmentCount) {
+        this.attachmentCount = attachmentCount;
+    }
+
+    public String getUid() {
         return uid;
     }
 
-    public void setUid(long uid) {
+    public void setUid(String uid) {
         this.uid = uid;
     }
 
@@ -90,38 +243,6 @@ public class LocalMessage extends LitePalSupport {
         this.size = size;
     }
 
-    public int getFlags() {
-        return flags;
-    }
-
-    public void setFlags(int flags) {
-        this.flags = flags;
-    }
-
-    public int getOriginalFlags() {
-        return originalFlags;
-    }
-
-    public void setOriginalFlags(int originalFlags) {
-        this.originalFlags = originalFlags;
-    }
-
-    public List<String> getCustomFlags() {
-        return customFlags;
-    }
-
-    public void setCustomFlags(List<String> customFlags) {
-        this.customFlags = customFlags;
-    }
-
-    public long getModSeqValue() {
-        return modSeqValue;
-    }
-
-    public void setModSeqValue(long modSeqValue) {
-        this.modSeqValue = modSeqValue;
-    }
-
     public LocalPart getMainPart() {
         return mainPart;
     }
@@ -130,27 +251,91 @@ public class LocalMessage extends LitePalSupport {
         this.mainPart = mainPart;
     }
 
-    public List<String> getGmailLabels() {
-        return gmailLabels;
+    public String getTextPlain() {
+        return textPlain;
     }
 
-    public void setGmailLabels(List<String> gmailLabels) {
-        this.gmailLabels = gmailLabels;
+    public void setTextPlain(String textPlain) {
+        this.textPlain = textPlain;
     }
 
-    public long getGmailMessageID() {
-        return gmailMessageID;
+    public boolean isDecode() {
+        return isDecode;
     }
 
-    public void setGmailMessageID(long gmailMessageID) {
-        this.gmailMessageID = gmailMessageID;
+    public void setDecode(boolean decode) {
+        isDecode = decode;
     }
 
-    public long getGmailThreadID() {
-        return gmailThreadID;
+    public String getKeyId() {
+        return keyId;
     }
 
-    public void setGmailThreadID(long gmailThreadID) {
-        this.gmailThreadID = gmailThreadID;
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
+
+    public int getEncrypt() {
+        return encrypt;
+    }
+
+    public void setEncrypt(int encrypt) {
+        this.encrypt = encrypt;
+    }
+
+    public boolean isAnswered() {
+        return answered;
+    }
+
+    public void setAnswered(boolean answered) {
+        this.answered = answered;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isDraft() {
+        return draft;
+    }
+
+    public void setDraft(boolean draft) {
+        this.draft = draft;
+    }
+
+    public boolean isFlagged() {
+        return flagged;
+    }
+
+    public void setFlagged(boolean flagged) {
+        this.flagged = flagged;
+    }
+
+    public boolean isRecent() {
+        return recent;
+    }
+
+    public void setRecent(boolean recent) {
+        this.recent = recent;
+    }
+
+    public boolean isSeen() {
+        return seen;
+    }
+
+    public void setSeen(boolean seen) {
+        this.seen = seen;
+    }
+
+    public boolean isUser() {
+        return user;
+    }
+
+    public void setUser(boolean user) {
+        this.user = user;
     }
 }

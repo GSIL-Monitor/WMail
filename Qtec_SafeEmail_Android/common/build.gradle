@@ -21,8 +21,8 @@ android {
     dataBinding{
         enabled = true
     }
-}
 
+}
 
 
 
@@ -51,8 +51,13 @@ dependencies {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'stax', module: 'stax'
     }
-    // 第三方库
+    // Glide
     api "com.github.bumptech.glide:glide:${rootProject.glideVersion}"
     api "com.google.code.gson:gson:${rootProject.gsonVersion}"
-
+//    //Litepal
+    api "org.litepal.android:core:${rootProject.litepalVersion}"
+//    //Java mail
+    api ("com.sun.mail:android-mail:${rootProject.androidMailVersion}"){
+        exclude group: 'javax.activation'
+    }
 }

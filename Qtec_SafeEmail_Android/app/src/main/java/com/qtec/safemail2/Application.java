@@ -23,9 +23,5 @@ public class Application extends BaseApplication{
             ARouter.openLog();
         }
         ARouter.init(this);
-
-        OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder().build();
-        okHttpClient.newCall(request).execute();
     }
 }

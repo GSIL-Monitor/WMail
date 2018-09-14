@@ -14,7 +14,7 @@ android {
         versionName "1.0"
 
         if (isModule.toBoolean()) {
-            applicationId "com.gongw.mail"
+            applicationId "com.gongw.mailcore"
             versionCode 1
             versionName "1.0"
         } else {
@@ -51,23 +51,9 @@ android {
     dataBinding{
         enabled = true
     }
-}
 
-repositories {
-    jcenter() {
-        url "https://maven.java.net/content/groups/public/"
-    }
-    maven {
-        url 'http://jcenter.bintray.com/'
-    }
 }
 
 dependencies {
     implementation project(':common')
-    compile fileTree(dir: 'libs', include: ['*.jar', "*.aar"])
-    //litepal
-    compile 'org.litepal.android:core:2.0.0'
-    //java mail
-    compile 'com.sun.mail:android-mail:1.6.1'
-    compile 'com.sun.mail:android-activation:1.6.1'
 }

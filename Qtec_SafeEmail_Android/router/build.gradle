@@ -26,6 +26,8 @@ android {
 }
 
 dependencies {
-    api "com.alibaba:arouter-api:${rootProject.arouterApiVersion}"
+    api ("com.alibaba:arouter-api:${rootProject.arouterApiVersion}"){
+        exclude group: 'com.android.support'
+    }
     annotationProcessor "com.alibaba:arouter-compiler:${rootProject.annotationProcessor}"
 }

@@ -1,9 +1,6 @@
 package com.gongw.mailcore.message;
 
-import android.content.ContentValues;
-
 import org.litepal.LitePal;
-
 import java.util.List;
 
 /**
@@ -13,29 +10,35 @@ import java.util.List;
 public class MessageLocalResource {
 
 
-
-    public void insertMessage(LocalMessage localMessage){
-        localMessage.save();
+    public List<LocalMessage> getMessagesByFolderId(long folderId, int limit, int offset){
+        return LitePal.where("localfolder_id = ?", String.valueOf(folderId))
+                .limit(limit)
+                .offset(offset)
+                .order("receiveDate desc")
+                .find(LocalMessage.class);
     }
 
-    public void insertMessages(List<LocalMessage> localMessageList){
-        LitePal.saveAll(localMessageList);
+    public int getMsgCountByFolderId(long folderId, int limit, int offset){
+        return LitePal.where("localfolder_id = ?", String.valueOf(folderId))
+                .limit(limit)
+                .offset(offset)
+                .count(LocalMessage.class);
     }
 
-    public void deleteMessage(long id){
+    public void saveOrUpdateMessages(LocalMessage localMessage){
+        localMessage.saveOrUpdate("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), localMessage.getUid());
+    }
+
+    public void deleteMessageById(long id){
         LitePal.delete(LocalMessage.class, id);
     }
 
-    public void deleteMessages(String... conditions){
-        LitePal.deleteAll(LocalMessage.class, conditions);
+    public void deleteMessagesByFolderId(long folderId){
+        LitePal.deleteAll(LocalMessage.class, "localfolder_id = ?", String.valueOf(folderId));
     }
 
-    public void updateMessage(ContentValues contentValues, long id){
-        LitePal.update(LocalMessage.class, contentValues, id);
-    }
-
-    public void updateMessages(ContentValues contentValues, String... conditions){
-        LitePal.updateAll(LocalMessage.class, contentValues, conditions);
+    public void deleteAllMessages(){
+        LitePal.deleteAll(LocalMessage.class);
     }
 
 }

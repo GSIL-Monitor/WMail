@@ -1,6 +1,14 @@
 package com.gongw.mailcore.folder;
 
+import com.gongw.mailcore.account.Account;
+import com.gongw.mailcore.message.LocalMessage;
+
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Created by gongw on 2018/7/22.
@@ -8,93 +16,87 @@ import org.litepal.crud.LitePalSupport;
 
 public class LocalFolder extends LitePalSupport {
 
-    private String path;
+    private long id;
+    @Column(nullable = false)
+    private Account account;
 
-    private char delimiter;
+    @Column(unique = true, nullable = false)
+    private String url;
 
-    private int flags;
+    @Column(nullable = false)
+    private String fullName;
 
-    private long uidNext;
+    private int type;
 
-    private long uidValidity;
+    private char separator;
 
-    private long modSequenceValue;
+    private int newMsgCount;
 
-    private int messageCount;
+    private int msgCount;
 
-    private long firstUnseenUid;
+    private List<LocalMessage> localMessageList = new ArrayList<>();
 
-    private boolean allowsNewPermanentFlags;
-
-    public String getPath() {
-        return path;
+    public long getId() {
+        return id;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public char getDelimiter() {
-        return delimiter;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setDelimiter(char delimiter) {
-        this.delimiter = delimiter;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
-    public int getFlags() {
-        return flags;
+    public String getUrl() {
+        return url;
     }
 
-    public void setFlags(int flags) {
-        this.flags = flags;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public long getUidNext() {
-        return uidNext;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setUidNext(long uidNext) {
-        this.uidNext = uidNext;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public long getUidValidity() {
-        return uidValidity;
+    public int getType() {
+        return type;
     }
 
-    public void setUidValidity(long uidValidity) {
-        this.uidValidity = uidValidity;
+    public void setType(int type) {
+        this.type = type;
     }
 
-    public long getModSequenceValue() {
-        return modSequenceValue;
+    public char getSeparator() {
+        return separator;
     }
 
-    public void setModSequenceValue(long modSequenceValue) {
-        this.modSequenceValue = modSequenceValue;
+    public void setSeparator(char separator) {
+        this.separator = separator;
     }
 
-    public int getMessageCount() {
-        return messageCount;
+    public int getNewMsgCount() {
+        return newMsgCount;
     }
 
-    public void setMessageCount(int messageCount) {
-        this.messageCount = messageCount;
+    public void setNewMsgCount(int newMsgCount) {
+        this.newMsgCount = newMsgCount;
     }
 
-    public long getFirstUnseenUid() {
-        return firstUnseenUid;
+    public int getMsgCount() {
+        return msgCount;
     }
 
-    public void setFirstUnseenUid(long firstUnseenUid) {
-        this.firstUnseenUid = firstUnseenUid;
-    }
-
-    public boolean isAllowsNewPermanentFlags() {
-        return allowsNewPermanentFlags;
-    }
-
-    public void setAllowsNewPermanentFlags(boolean allowsNewPermanentFlags) {
-        this.allowsNewPermanentFlags = allowsNewPermanentFlags;
+    public void setMsgCount(int msgCount) {
+        this.msgCount = msgCount;
     }
 }

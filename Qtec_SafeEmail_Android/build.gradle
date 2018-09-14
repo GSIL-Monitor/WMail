@@ -5,6 +5,9 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven {
+            url 'https://maven.java.net/content/groups/public/'
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
@@ -15,10 +18,14 @@ buildscript {
     }
 }
 
+
 allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url 'https://maven.java.net/content/groups/public/'
+        }
     }
 }
 
@@ -50,4 +57,7 @@ ext {
     okhttpVersion = '3.9.1'
     okhttploggingVersion = '3.8.1'
     retrofitVersion = '2.3.0'
+    litepalVersion = '2.0.0'
+    androidMailVersion = '1.6.1'
+    androidActivationVersion = '1.6.1'
 }
