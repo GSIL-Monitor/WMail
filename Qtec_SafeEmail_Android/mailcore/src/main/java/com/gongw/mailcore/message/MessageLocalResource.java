@@ -9,6 +9,16 @@ import java.util.List;
 
 public class MessageLocalResource {
 
+    private static class InstanceHolder{
+        private static MessageLocalResource instance = new MessageLocalResource();
+    }
+
+    private MessageLocalResource(){
+    }
+
+    public static MessageLocalResource singleInstance(){
+        return InstanceHolder.instance;
+    }
 
     public List<LocalMessage> getMessagesByFolderId(long folderId, int limit, int offset){
         return LitePal.where("localfolder_id = ?", String.valueOf(folderId))
@@ -25,7 +35,13 @@ public class MessageLocalResource {
                 .count(LocalMessage.class);
     }
 
-    public void saveOrUpdateMessages(LocalMessage localMessage){
+    public void saveOrUpdateMessages(List<LocalMessage> localMessages){
+        for(LocalMessage localMessage : localMessages){
+            saveOrUpdateMessage(localMessage);
+        }
+    }
+
+    public void saveOrUpdateMessage(LocalMessage localMessage){
         localMessage.saveOrUpdate("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), localMessage.getUid());
     }
 

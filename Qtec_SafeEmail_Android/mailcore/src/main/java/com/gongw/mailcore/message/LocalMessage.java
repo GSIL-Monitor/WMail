@@ -80,7 +80,7 @@ public class LocalMessage extends LitePalSupport {
      */
     private boolean user;
 
-    private List<LocalPart> localParts;
+    private List<LocalPart> partList;
 
     private int attachmentCount;
 
@@ -88,15 +88,9 @@ public class LocalMessage extends LitePalSupport {
 
     private long size;
 
-    private LocalPart mainPart;
+    private LocalPart htmlContentPart;
 
-    private String textPlain;
-
-    private boolean isDecode;
-
-    private String keyId;
-
-    private int encrypt;
+    private LocalPart textContentPart;
 
 
     public long getId() {
@@ -211,12 +205,12 @@ public class LocalMessage extends LitePalSupport {
         this.messageId = messageId;
     }
 
-    public List<LocalPart> getLocalParts() {
-        return localParts;
+    public List<LocalPart> getPartList() {
+        return partList;
     }
 
-    public void setLocalParts(List<LocalPart> localParts) {
-        this.localParts = localParts;
+    public void setPartList(List<LocalPart> partList) {
+        this.partList = partList;
     }
 
     public int getAttachmentCount() {
@@ -241,46 +235,6 @@ public class LocalMessage extends LitePalSupport {
 
     public void setSize(long size) {
         this.size = size;
-    }
-
-    public LocalPart getMainPart() {
-        return mainPart;
-    }
-
-    public void setMainPart(LocalPart mainPart) {
-        this.mainPart = mainPart;
-    }
-
-    public String getTextPlain() {
-        return textPlain;
-    }
-
-    public void setTextPlain(String textPlain) {
-        this.textPlain = textPlain;
-    }
-
-    public boolean isDecode() {
-        return isDecode;
-    }
-
-    public void setDecode(boolean decode) {
-        isDecode = decode;
-    }
-
-    public String getKeyId() {
-        return keyId;
-    }
-
-    public void setKeyId(String keyId) {
-        this.keyId = keyId;
-    }
-
-    public int getEncrypt() {
-        return encrypt;
-    }
-
-    public void setEncrypt(int encrypt) {
-        this.encrypt = encrypt;
     }
 
     public boolean isAnswered() {
@@ -337,5 +291,21 @@ public class LocalMessage extends LitePalSupport {
 
     public void setUser(boolean user) {
         this.user = user;
+    }
+
+    public LocalPart getHtmlContentPart() {
+        return htmlContentPart;
+    }
+
+    public void setHtmlContentPart(LocalPart htmlContentPart) {
+        this.htmlContentPart = htmlContentPart;
+    }
+
+    public LocalPart getTextContentPart() {
+        return textContentPart;
+    }
+
+    public void setTextContentPart(LocalPart textContentPart) {
+        this.textContentPart = textContentPart;
     }
 }

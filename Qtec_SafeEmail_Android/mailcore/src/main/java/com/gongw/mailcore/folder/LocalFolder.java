@@ -34,7 +34,7 @@ public class LocalFolder extends LitePalSupport {
 
     private int msgCount;
 
-    private List<LocalMessage> localMessageList = new ArrayList<>();
+    private List<LocalMessage> messageList;
 
     public long getId() {
         return id;
@@ -98,5 +98,13 @@ public class LocalFolder extends LitePalSupport {
 
     public void setMsgCount(int msgCount) {
         this.msgCount = msgCount;
+    }
+
+    public List<LocalMessage> getMessageList() {
+        return messageList;
+    }
+
+    public void setMessageList(List<LocalMessage> messageList) {
+        this.messageList = messageList;
     }
 }

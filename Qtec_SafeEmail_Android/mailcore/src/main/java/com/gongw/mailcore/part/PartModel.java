@@ -1,13 +1,9 @@
 package com.gongw.mailcore.part;
 
-import com.gongw.mailcore.account.Account;
 import com.gongw.mailcore.message.LocalMessage;
-import com.gongw.mailcore.setting.MailSession;
-
+import java.io.IOException;
 import java.util.List;
-
 import javax.mail.MessagingException;
-import javax.mail.Store;
 
 /**
  * Created by gongw on 2018/9/14.
@@ -16,43 +12,40 @@ import javax.mail.Store;
 public class PartModel {
 
     private PartLocalResource partLocalResource;
+    private PartNetResource partNetResource;
+
 
     private static class InstanceHolder{
         private static PartModel instance = new PartModel();
     }
 
     private PartModel(){
-        partLocalResource = new PartLocalResource();
+        partLocalResource = PartLocalResource.singleInstance();
+        partNetResource = PartNetResource.singleInstance();
     }
 
     public static PartModel singleInstance(){
         return InstanceHolder.instance;
     }
 
-    public List<LocalPart> getAllParts(LocalMessage localMessage) throws MessagingException {
-        int partCount = partLocalResource.getPartsCountByMsgId(localMessage.getId());
-        if(partCount > 0 ){
-            return partLocalResource.getPartsByMsgId(localMessage.getId());
+    public List<LocalPart> getParts(LocalMessage localMessage) throws MessagingException, IOException {
+        List<LocalPart> partList = partLocalResource.getPartsByMsgId(localMessage.getId());
+        if(partList.size() < 1 ){
+            partList = getFreshParts(localMessage);
         }
-        updatePartLocalResource(localMessage);
-        return partLocalResource.getPartsByMsgId(localMessage.getId());
+        for(LocalPart localPart : partList){
+            localPart.setLocalMessage(localMessage);
+        }
+        localMessage.setPartList(partList);
+        return partList;
     }
 
-    public void updatePartLocalResource(LocalMessage localMessage) throws MessagingException {
-        Store store = MailSession.getDefaultSession().getStore(new URLName(account.getStoreUrl()));
-        store.connect();
-        Folder[] folders = store.getDefaultFolder().list();
-        for(Folder folder : folders){
-            LocalFolder localFolder = new LocalFolder();
-            localFolder.setAccount(account);
-            localFolder.setFullName(folder.getFullName());
-            localFolder.setMsgCount(folder.getMessageCount());
-            localFolder.setNewMsgCount(folder.getNewMessageCount());
-            localFolder.setSeparator(folder.getSeparator());
-            localFolder.setType(folder.getType());
-            localFolder.setUrl(folder.getURLName().toString());
-            folderLocalResource.saveOrUpdateFolder(localFolder);
-        }
+    public List<LocalPart> getFreshParts(LocalMessage localMessage) throws MessagingException, IOException {
+        List<LocalPart> localParts = partNetResource.getParts(localMessage);
+        partLocalResource.saveOrUpdateParts(localParts);
+        return localParts;
     }
+
+
 
 }

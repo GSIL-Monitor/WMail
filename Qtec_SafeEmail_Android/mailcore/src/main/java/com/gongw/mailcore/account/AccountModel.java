@@ -24,9 +24,8 @@ public class AccountModel {
         return LitePal.findAll(Account.class);
     }
 
-    public List<Account> getAccountsById(int id){
-        return LitePal.where("id = ?", String.valueOf(id))
-                .find(Account.class);
+    public Account getAccountsById(int id){
+        return LitePal.find(Account.class, id);
     }
 
     public List<Account> getAccountsByEmail(String email){

@@ -25,7 +25,7 @@ public class Account extends LitePalSupport{
     private String userName;
     private boolean isAvailable = true;
 
-    private List<LocalFolder> localFolderList = new ArrayList<>();
+    private List<LocalFolder> folderList;
 
     public long getId() {
         return id;
@@ -83,11 +83,11 @@ public class Account extends LitePalSupport{
         isAvailable = available;
     }
 
-    public List<LocalFolder> getLocalFolderList() {
-        return localFolderList;
+    public List<LocalFolder> getFolderList() {
+        return folderList;
     }
 
-    public void setLocalFolderList(List<LocalFolder> localFolderList) {
-        this.localFolderList = localFolderList;
+    public void setFolderList(List<LocalFolder> folderList) {
+        this.folderList = folderList;
     }
 }

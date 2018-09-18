@@ -10,8 +10,25 @@ import java.util.List;
 
 public class FolderLocalResource {
 
+    private static class InstanceHolder{
+        private static FolderLocalResource instance = new FolderLocalResource();
+    }
+
+    private FolderLocalResource(){
+    }
+
+    public static FolderLocalResource singleInstance(){
+        return InstanceHolder.instance;
+    }
+
     public List<LocalFolder> getFoldersByAccountId(long accountId){
-        return LitePal.where("account_id = ?", String.valueOf(accountId)).find(LocalFolder.class);
+        return LitePal.where("account_id = ?", String.valueOf(accountId))
+                .find(LocalFolder.class);
+    }
+
+    public List<LocalFolder> getFolders(long accountId, String fullName){
+        return LitePal.where("account_id = ? and fullName = ?", String.valueOf(accountId), fullName)
+                .find(LocalFolder.class);
     }
 
     public int getFolderCountByAccountId(long accountId){

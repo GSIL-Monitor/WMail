@@ -1,23 +1,40 @@
 package com.gongw.mailcore.folder;
 
+import com.gongw.mailcore.MailFetcher;
+import com.gongw.mailcore.NetResource;
 import com.gongw.mailcore.account.Account;
-import com.gongw.mailcore.IMAPFetcher;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-import javax.mail.URLName;
 
 /**
  * Created by gongw on 2018/9/11.
  */
 
-public class FolderNetResource {
+public class FolderNetResource extends NetResource{
 
+    private static class InstanceHolder{
+        private static FolderNetResource instance = new FolderNetResource();
+    }
+
+    private FolderNetResource(){
+    }
+
+    public static FolderNetResource singleInstance(){
+        return InstanceHolder.instance;
+    }
+
+    /**
+     * 获取该邮箱下所有文件夹
+     * @param account 邮箱账号信息
+     * @return LocalFolder对象列表
+     * @throws MessagingException
+     */
     public List<LocalFolder> getAllFolders(Account account) throws MessagingException {
-        IMAPFetcher imapFetcher = new IMAPFetcher(new URLName(account.getStoreUrl()));
-        Folder[] folders = imapFetcher.fetchFolders();
+        MailFetcher fetcher = getFetcher(account);
         List<LocalFolder> localFolders = new ArrayList<>();
+        Folder[] folders = fetcher.fetchFolders();
         for(Folder folder : folders){
             LocalFolder localFolder = new LocalFolder();
             localFolder.setAccount(account);
@@ -31,6 +48,7 @@ public class FolderNetResource {
         }
         return localFolders;
     }
+
 
 
 }
