@@ -35,7 +35,9 @@
         <mapping class="com.gongw.mailcore.account.Account"/>
         <mapping class="com.gongw.mailcore.folder.LocalFolder"/>
         <mapping class="com.gongw.mailcore.message.LocalMessage"/>
+        <mapping class="com.gongw.mailcore.message.MessageContact"/>
         <mapping class="com.gongw.mailcore.part.LocalPart"/>
+        <mapping class="com.gongw.mailcore.contact.Contact"/>
     </list>
 
     <!--

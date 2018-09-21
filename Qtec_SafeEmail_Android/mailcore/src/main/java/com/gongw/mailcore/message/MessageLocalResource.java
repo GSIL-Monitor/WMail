@@ -1,6 +1,10 @@
 package com.gongw.mailcore.message;
 
+import com.gongw.mailcore.contact.ContactModel;
+
 import org.litepal.LitePal;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,12 +24,23 @@ public class MessageLocalResource {
         return InstanceHolder.instance;
     }
 
+    public LocalMessage getMessageById(long id){
+        LocalMessage message = LitePal.find(LocalMessage.class, id);
+        fillMessageContacts(message);
+        return message;
+    }
+
     public List<LocalMessage> getMessagesByFolderId(long folderId, int limit, int offset){
-        return LitePal.where("localfolder_id = ?", String.valueOf(folderId))
+        List<LocalMessage> messages = LitePal.where("localfolder_id = ?", String.valueOf(folderId))
                 .limit(limit)
                 .offset(offset)
                 .order("receiveDate desc")
                 .find(LocalMessage.class);
+
+        for(LocalMessage localMessage : messages){
+            fillMessageContacts(localMessage);
+        }
+        return messages;
     }
 
     public int getMsgCountByFolderId(long folderId, int limit, int offset){
@@ -57,4 +72,44 @@ public class MessageLocalResource {
         LitePal.deleteAll(LocalMessage.class);
     }
 
+    private void fillMessageContacts(LocalMessage localMessage){
+        List<MessageContact> messageContacts = LitePal.where("localmessage_id = ?", String.valueOf(localMessage.getId()))
+                .find(MessageContact.class, true);
+        List<MessageContact> from = new ArrayList<>();
+        List<MessageContact> reply = new ArrayList<>();
+        List<MessageContact> to = new ArrayList<>();
+        List<MessageContact> cc = new ArrayList<>();
+        List<MessageContact> bcc = new ArrayList<>();
+
+        localMessage.setFrom(from);
+        localMessage.setRecipientsTo(to);
+        localMessage.setRecipientsCc(cc);
+        localMessage.setRecipientsBcc(bcc);
+        localMessage.setReplyTo(reply);
+        for(MessageContact messageContact : messageContacts){
+            switch (messageContact.getType()){
+                case MessageContact.Type.FROM:
+                    from.add(messageContact);
+                    break;
+                case MessageContact.Type.TO:
+                    to.add(messageContact);
+                    break;
+                case MessageContact.Type.CC:
+                    cc.add(messageContact);
+                    break;
+                case MessageContact.Type.BCC:
+                    bcc.add(messageContact);
+                    break;
+                case MessageContact.Type.REPLY:
+                    reply.add(messageContact);
+                    break;
+                case MessageContact.Type.SENDER:
+                    localMessage.setSender(messageContact);
+                    break;
+            }
+
+
+        }
+
+    }
 }

@@ -42,6 +42,8 @@ public class AccountModel {
 
     public void saveOrUpdateAccount(Account account){
         account.saveOrUpdate("email = ?", account.getEmail());
+        List<Account> accountList = getAccountsByEmail(account.getEmail());
+        account.setId(accountList.get(0).getId());
     }
 
     public void deleteById(int id){

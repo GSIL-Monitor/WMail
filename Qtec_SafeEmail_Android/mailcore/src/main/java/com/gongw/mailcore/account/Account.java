@@ -4,10 +4,7 @@ package com.gongw.mailcore.account;
 import com.gongw.mailcore.folder.LocalFolder;
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.mail.URLName;
 
 
 /**
@@ -19,6 +16,7 @@ public class Account extends LitePalSupport{
     private long id;
     @Column(unique = true, nullable = false)
     private String email;
+    //storeUrl and transportUrl can use URLName.toString() format
     private String storeUrl;
     private String transportUrl;
     private String password;

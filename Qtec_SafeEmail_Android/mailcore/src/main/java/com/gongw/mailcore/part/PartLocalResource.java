@@ -3,6 +3,8 @@ package com.gongw.mailcore.part;
 import org.litepal.LitePal;
 import java.util.List;
 
+import javax.mail.Part;
+
 /**
  * Created by gongw on 2018/9/14.
  */
@@ -20,13 +22,24 @@ public class PartLocalResource {
         return InstanceHolder.instance;
     }
 
-    public int getPartsCountByMsgId(long id){
-        return LitePal.where("localmessage_id = ?", String.valueOf(id))
-                .count(LocalPart.class);
+    public List<LocalPart> getParts(long localMessage_id){
+        return LitePal.where("localmessage_id = ?", String.valueOf(localMessage_id))
+                .find(LocalPart.class);
     }
 
-    public List<LocalPart> getPartsByMsgId(long id){
-        return LitePal.where("localmessage_id = ?", String.valueOf(id))
+    public LocalPart getAttachPart(long localMessage_id, long index){
+        List<LocalPart> parts = LitePal.where("localmessage_id = ? and disposition = ? and index = ?", String.valueOf(localMessage_id), Part.ATTACHMENT, String.valueOf(index))
+                .find(LocalPart.class);
+        return parts.size()>0 ? parts.get(0) : null;
+    }
+
+    public List<LocalPart> getContentParts(long localMessage_id){
+        return LitePal.where("localmessage_id = ? and disposition = null", String.valueOf(localMessage_id))
+                .find(LocalPart.class);
+    }
+
+    public List<LocalPart> getInLineParts(long localMessage_id){
+        return LitePal.where("localmessage_id = ? and disposition = ?", String.valueOf(localMessage_id), Part.INLINE)
                 .find(LocalPart.class);
     }
 

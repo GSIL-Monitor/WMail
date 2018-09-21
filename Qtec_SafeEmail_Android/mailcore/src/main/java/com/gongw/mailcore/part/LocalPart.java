@@ -10,6 +10,14 @@ import org.litepal.crud.LitePalSupport;
  */
 
 public class LocalPart extends LitePalSupport {
+
+    public static class Type{
+        public static final String HTML_CONTENT = "html_content";
+        public static final String TEXT_CONTENT = "text_content";
+        public static final String ATTACHMENT = "attachment";
+        public static final String INLINE = "inline";
+    }
+
     /**
      * 数据存储在数据库
      */
@@ -51,6 +59,8 @@ public class LocalPart extends LitePalSupport {
     private boolean isDecode;
 
     private int dataLocation;
+
+    private String type;
 
 
     public long getId() {
@@ -163,5 +173,13 @@ public class LocalPart extends LitePalSupport {
 
     public void setDataLocation(int dataLocation) {
         this.dataLocation = dataLocation;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

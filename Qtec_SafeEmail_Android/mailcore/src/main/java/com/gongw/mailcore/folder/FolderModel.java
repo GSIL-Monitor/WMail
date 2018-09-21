@@ -28,8 +28,9 @@ public class FolderModel {
 
     public List<LocalFolder> getFolders(Account account) throws MessagingException {
         List<LocalFolder> folderList = folderLocalResource.getFoldersByAccountId(account.getId());
-        if(folderList.size() < 1 ){
-            folderList = getFreshFolders(account);
+        if(folderList.size() < 1){
+            refreshFolders(account);
+            folderList = folderLocalResource.getFoldersByAccountId(account.getId());
         }
         for(LocalFolder localFolder : folderList){
             localFolder.setAccount(account);
@@ -38,10 +39,9 @@ public class FolderModel {
         return folderList;
     }
 
-    public  List<LocalFolder> getFreshFolders(Account account) throws MessagingException {
+    public  void refreshFolders(Account account) throws MessagingException {
         List<LocalFolder> folders = folderNetResource.getAllFolders(account);
         folderLocalResource.saveOrUpdateFolder(folders);
-        return folders;
     }
 
 

@@ -30,17 +30,17 @@ public class LocalMessage extends LitePalSupport {
 
     private int flags;
 
-    private List<Contact> recipientsTo;
+    private List<MessageContact> recipientsTo;
 
-    private List<Contact> recipientsCc;
+    private List<MessageContact> recipientsCc;
 
-    private List<Contact> recipientsBcc;
+    private List<MessageContact> recipientsBcc;
 
-    private List<Contact> from;
+    private List<MessageContact> from;
 
-    private List<Contact> replyTo;
+    private List<MessageContact> replyTo;
 
-    private Contact sender;
+    private MessageContact sender;
 
     @Column(unique = true)
     private String messageId;
@@ -87,11 +87,6 @@ public class LocalMessage extends LitePalSupport {
     private String uid;
 
     private long size;
-
-    private LocalPart htmlContentPart;
-
-    private LocalPart textContentPart;
-
 
     public long getId() {
         return id;
@@ -149,51 +144,11 @@ public class LocalMessage extends LitePalSupport {
         this.flags = flags;
     }
 
-    public List<Contact> getRecipientsTo() {
-        return recipientsTo;
-    }
-
-    public void setRecipientsTo(List<Contact> recipientsTo) {
-        this.recipientsTo = recipientsTo;
-    }
-
-    public List<Contact> getRecipientsCc() {
-        return recipientsCc;
-    }
-
-    public void setRecipientsCc(List<Contact> recipientsCc) {
-        this.recipientsCc = recipientsCc;
-    }
-
-    public List<Contact> getRecipientsBcc() {
-        return recipientsBcc;
-    }
-
-    public void setRecipientsBcc(List<Contact> recipientsBcc) {
-        this.recipientsBcc = recipientsBcc;
-    }
-
-    public List<Contact> getFrom() {
-        return from;
-    }
-
-    public void setFrom(List<Contact> from) {
-        this.from = from;
-    }
-
-    public List<Contact> getReplyTo() {
-        return replyTo;
-    }
-
-    public void setReplyTo(List<Contact> replyTo) {
-        this.replyTo = replyTo;
-    }
-
-    public Contact getSender() {
+    public MessageContact getSender() {
         return sender;
     }
 
-    public void setSender(Contact sender) {
+    public void setSender(MessageContact sender) {
         this.sender = sender;
     }
 
@@ -294,18 +249,66 @@ public class LocalMessage extends LitePalSupport {
     }
 
     public LocalPart getHtmlContentPart() {
-        return htmlContentPart;
-    }
-
-    public void setHtmlContentPart(LocalPart htmlContentPart) {
-        this.htmlContentPart = htmlContentPart;
+        if(partList == null){
+            return null;
+        }
+        for(LocalPart part : partList){
+            if(LocalPart.Type.HTML_CONTENT.equals(part.getType())){
+                return part;
+            }
+        }
+        return null;
     }
 
     public LocalPart getTextContentPart() {
-        return textContentPart;
+        if(partList == null){
+            return null;
+        }
+        for(LocalPart part : partList){
+            if(LocalPart.Type.TEXT_CONTENT.equals(part.getType())){
+                return part;
+            }
+        }
+        return null;
     }
 
-    public void setTextContentPart(LocalPart textContentPart) {
-        this.textContentPart = textContentPart;
+    public List<MessageContact> getRecipientsTo() {
+        return recipientsTo;
+    }
+
+    public void setRecipientsTo(List<MessageContact> recipientsTo) {
+        this.recipientsTo = recipientsTo;
+    }
+
+    public List<MessageContact> getRecipientsCc() {
+        return recipientsCc;
+    }
+
+    public void setRecipientsCc(List<MessageContact> recipientsCc) {
+        this.recipientsCc = recipientsCc;
+    }
+
+    public List<MessageContact> getRecipientsBcc() {
+        return recipientsBcc;
+    }
+
+    public void setRecipientsBcc(List<MessageContact> recipientsBcc) {
+        this.recipientsBcc = recipientsBcc;
+    }
+
+    public List<MessageContact> getFrom() {
+        return from;
+    }
+
+    public void setFrom(List<MessageContact> from) {
+        this.from = from;
+    }
+
+    public List<MessageContact> getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(List<MessageContact> replyTo) {
+        this.replyTo = replyTo;
     }
 }
