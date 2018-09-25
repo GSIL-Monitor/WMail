@@ -2,6 +2,7 @@ package com.gongw.mailcore.message;
 
 import com.gongw.mailcore.contact.Contact;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 /**
@@ -21,12 +22,11 @@ public class MessageContact extends LitePalSupport{
 
     private long id;
 
-    private LocalMessage localMessage;
-
     private Contact contact;
 
-    private String type;
+    private LocalMessage localMessage;
 
+    private String type;
 
     public long getId() {
         return id;
@@ -36,20 +36,20 @@ public class MessageContact extends LitePalSupport{
         this.id = id;
     }
 
-    public LocalMessage getLocalMessage() {
-        return localMessage;
-    }
-
-    public void setLocalMessage(LocalMessage localMessage) {
-        this.localMessage = localMessage;
-    }
-
     public Contact getContact() {
         return contact;
     }
 
     public void setContact(Contact contact) {
         this.contact = contact;
+    }
+
+    public LocalMessage getLocalMessage() {
+        return localMessage;
+    }
+
+    public void setLocalMessage(LocalMessage localMessage) {
+        this.localMessage = localMessage;
     }
 
     public String getType() {

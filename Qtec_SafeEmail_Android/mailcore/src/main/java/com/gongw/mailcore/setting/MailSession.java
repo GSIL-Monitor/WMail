@@ -22,7 +22,7 @@ public class MailSession {
                 return super.getPasswordAuthentication();
             }
         });
-        session.setDebug(true);
+        session.setDebug(false);
     }
 
     private static class SessionHolder{

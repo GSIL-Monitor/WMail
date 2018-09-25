@@ -66,9 +66,12 @@ public class MessageNetResource extends NetResource{
                 //MessageID
                 localMessage.setMessageId(imapMessage.getMessageID());
                 //Sender
-                Contact contact = convertContact(imapMessage.getSender());
-                MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.SENDER);
-                localMessage.setSender(messageContact);
+                Address sender = imapMessage.getSender();
+                if(sender != null){
+                    Contact contact = convertContact(sender);
+                    MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.SENDER);
+                    localMessage.setSender(messageContact);
+                }
             }
             if(folder instanceof POP3Folder){
                 POP3Folder pop3Folder = (POP3Folder) folder;
@@ -78,9 +81,12 @@ public class MessageNetResource extends NetResource{
                 //MessageID
                 localMessage.setMessageId(pop3Message.getMessageID());
                 //Sender
-                Contact contact = convertContact(pop3Message.getSender());
-                MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.SENDER);
-                localMessage.setSender(messageContact);
+                Address sender = pop3Message.getSender();
+                if(sender != null){
+                    Contact contact = convertContact(sender);
+                    MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.SENDER);
+                    localMessage.setSender(messageContact);
+                }
             }
             localMessage.setSubject(message.getSubject());
             localMessage.setSentDate(message.getSentDate());
@@ -116,44 +122,61 @@ public class MessageNetResource extends NetResource{
             }
 
             //设置发件人
-            List<MessageContact> froms = new ArrayList<>();
-            localMessage.setFrom(froms);
-            for(Address address : message.getFrom()){
-                Contact contact = convertContact(address);
-                MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.FROM);
-                froms.add(messageContact);
+            Address[] from = message.getFrom();
+            if(from!=null && from.length > 0){
+                List<MessageContact> froms = new ArrayList<>(from.length);
+                localMessage.setFrom(froms);
+                for(Address address : from){
+                    Contact contact = convertContact(address);
+                    MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.FROM);
+                    froms.add(messageContact);
+                }
             }
-            //设置各种收件人，抄送，密送
-            List<MessageContact> recipientTo = new ArrayList<>();
-            localMessage.setRecipientsTo(recipientTo);
-            List<MessageContact> recipientCc = new ArrayList<>();
-            localMessage.setRecipientsCc(recipientCc);
-            List<MessageContact> recipientBcc = new ArrayList<>();
-            localMessage.setRecipientsBcc(recipientBcc);
 
-            for(Address address : message.getAllRecipients()){
-                Contact contact = convertContact(address);
-                if(Message.RecipientType.TO.toString().equals(address.getType())){
+            //设置各种收件人，抄送，密送
+            Address[] to = message.getRecipients(Message.RecipientType.TO);
+            if(to!=null && to.length > 0){
+                List<MessageContact> recipientTo = new ArrayList<>(to.length);
+                localMessage.setRecipientsTo(recipientTo);
+                for(Address address : to){
+                    Contact contact = convertContact(address);
                     MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.TO);
                     recipientTo.add(messageContact);
                 }
-                if(Message.RecipientType.CC.toString().equals(address.getType())){
+            }
+
+            Address[] cc = message.getRecipients(Message.RecipientType.CC);
+            if(cc!=null && cc.length > 0){
+                List<MessageContact> recipientCc = new ArrayList<>(cc.length);
+                localMessage.setRecipientsCc(recipientCc);
+                for(Address address : cc){
+                    Contact contact = convertContact(address);
                     MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.CC);
-                    recipientTo.add(messageContact);
+                    recipientCc.add(messageContact);
                 }
-                if(Message.RecipientType.BCC.toString().equals(address.getType())){
+            }
+
+            Address[] bcc = message.getRecipients(Message.RecipientType.BCC);
+            if(bcc!=null && bcc.length>0){
+                List<MessageContact> recipientBcc = new ArrayList<>(bcc.length);
+                localMessage.setRecipientsBcc(recipientBcc);
+                for(Address address : bcc){
+                    Contact contact = convertContact(address);
                     MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.BCC);
-                    recipientTo.add(messageContact);
+                    recipientBcc.add(messageContact);
                 }
             }
 
             //设置回复人
-            List<MessageContact> replyTos = new ArrayList<>();
-            localMessage.setReplyTo(replyTos);
-            for(Address address : message.getReplyTo()){
-                Contact contact = convertContact(address);
-                MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.REPLY);
-                replyTos.add(messageContact);
+            Address[] reply = message.getReplyTo();
+            if(reply!=null && reply.length > 0){
+                List<MessageContact> replyTos = new ArrayList<>(reply.length);
+                localMessage.setReplyTo(replyTos);
+                for(Address address : reply){
+                    Contact contact = convertContact(address);
+                    MessageContact messageContact = convertMessageContact(localMessage, contact, MessageContact.Type.REPLY);
+                    replyTos.add(messageContact);
+                }
             }
 
             localMessageList.add(localMessage);
@@ -169,8 +192,7 @@ public class MessageNetResource extends NetResource{
         Contact contact = new Contact();
         contact.setEmail(email);
         contact.setPersonalName(personalName);
-        ContactModel.singleInstance().saveOrUpdateContact(contact);
-        return ContactModel.singleInstance().getContact(email, personalName);
+        return contact;
     }
 
     private MessageContact convertMessageContact(LocalMessage localMessage, Contact contact, String type){
@@ -178,15 +200,7 @@ public class MessageNetResource extends NetResource{
         messageContact.setLocalMessage(localMessage);
         messageContact.setContact(contact);
         messageContact.setType(type);
-        messageContact.saveOrUpdate("localmessage_id = ? and contact_id = ? and type = ?",
-                                    String.valueOf(localMessage.getId()),
-                                    String.valueOf(localMessage.getId()),
-                                    String.valueOf(localMessage.getId()));
-        return LitePal.where("localmessage_id = ? and contact_id = ? and type = ?",
-                String.valueOf(localMessage.getId()),
-                String.valueOf(localMessage.getId()),
-                String.valueOf(localMessage.getId()))
-                .find(MessageContact.class).get(0);
+        return messageContact;
     }
 
 }

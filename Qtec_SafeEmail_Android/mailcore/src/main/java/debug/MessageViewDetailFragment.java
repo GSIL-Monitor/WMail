@@ -17,9 +17,11 @@ import com.gongw.mailcore.part.PartModel;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
 
 
 /**
@@ -71,24 +73,23 @@ public class MessageViewDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_messageview_detail, container, false);
-        webView = (WebView) rootView.findViewById(R.id.messageview_detail);
+        webView = rootView.findViewById(R.id.messageview_detail);
 
         if (message != null) {
-            Log.d("detail", "message: " + message);
             new Thread(){
                 @Override
                 public void run() {
                     try {
                         List<LocalPart> contentParts = PartModel.singleInstance().getContentParts(message);
-                        LocalPart htmlPart = contentParts.get(0);
-                        FileInputStream fis = new FileInputStream(htmlPart.getLocalPath());
+                        final LocalPart htmlPart = contentParts.get(0);
+                        InputStream fis = new FileInputStream(htmlPart.getLocalPath());
                         byte[] datas = new byte[fis.available()];
                         fis.read(datas);
-                        final String html = new String(datas);
+                        final String html = new String(datas, htmlPart.getCharset());
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                webView.loadData(html, "text/html", "utf-8");
+                                webView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null);
                             }
                         });
                     } catch (IOException e) {

@@ -34,7 +34,7 @@ public class ContactModel {
         return contacts.get(0);
     }
 
-    public Contact getContactById(int id){
+    public Contact getContactById(long id){
         return LitePal.find(Contact.class, id);
     }
 
@@ -50,7 +50,15 @@ public class ContactModel {
     }
 
     public void saveOrUpdateContact(Contact contact){
-        contact.saveOrUpdate("email = ? and personalName = ?", contact.getEmail(), contact.getPersonalName());
+        List<Contact> contacts = LitePal.where("email = ? and personalName = ?", contact.getEmail(), contact.getPersonalName())
+                .find(Contact.class);
+        if(contacts.size() < 1){
+            contact.save();
+        }else{
+            contact.update(contacts.get(0).getId());
+            contact.setId(contacts.get(0).getId());
+        }
+//        contact.saveOrUpdate("email = ? and personalName = ?", contact.getEmail(), contact.getPersonalName());
     }
 
     public void deleteById(int id){

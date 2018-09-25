@@ -2,11 +2,8 @@ package com.gongw.mailcore.folder;
 
 import com.gongw.mailcore.account.Account;
 import com.gongw.mailcore.message.LocalMessage;
-
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
-
-import java.util.ArrayList;
 import java.util.List;
 
 

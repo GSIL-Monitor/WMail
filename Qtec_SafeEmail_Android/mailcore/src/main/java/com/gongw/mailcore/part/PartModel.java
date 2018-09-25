@@ -47,10 +47,10 @@ public class PartModel {
     }
 
     public List<LocalPart> getContentParts(LocalMessage localMessage) throws IOException, MessagingException {
-        List<LocalPart> contentParts = partLocalResource.getContentParts(localMessage.getId());
+        List<LocalPart> contentParts = partLocalResource.getHtmlContentParts(localMessage.getId());
         if(contentParts.size() < 1 ){
             refreshContentParts(localMessage);
-            contentParts = partLocalResource.getContentParts(localMessage.getId());
+            contentParts = partLocalResource.getHtmlContentParts(localMessage.getId());
         }
         for(LocalPart localPart : contentParts){
             localPart.setLocalMessage(localMessage);

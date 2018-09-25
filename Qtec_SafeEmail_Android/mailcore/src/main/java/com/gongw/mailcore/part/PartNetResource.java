@@ -5,8 +5,16 @@ import android.text.TextUtils;
 import com.gongw.mailcore.MailFetcher;
 import com.gongw.mailcore.NetResource;
 import com.gongw.mailcore.message.LocalMessage;
+
+import org.w3c.dom.Text;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.BodyPart;
@@ -15,6 +23,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeUtility;
 
 /**
  * +-------------------------  multipart/mixed  -----------------------+
@@ -108,17 +117,16 @@ public class PartNetResource extends NetResource {
     }
 
     private List<Part> filterContentPart(Part part) throws MessagingException, IOException {
-        String contentType = part.getContentType().toLowerCase();
-        if(contentType.startsWith("multipart/mixed")){
+        if(part.isMimeType("multipart/mixed")){
             Multipart multiPart = (Multipart) part.getContent();
             return filterContentPart(multiPart.getBodyPart(0));
         }
-        if(contentType.startsWith("multipart/related")){
+        if(part.isMimeType("multipart/related")){
             Multipart multiPart = (Multipart) part.getContent();
             return filterContentPart(multiPart.getBodyPart(0));
         }
         List<Part> contentParts = new ArrayList<>();
-        if(contentType.startsWith("multipart/alternative")){
+        if(part.isMimeType("multipart/alternative")){
             Multipart multiPart = (Multipart) part.getContent();
             int count = multiPart.getCount();
             for(int i=0;i<count;i++){
@@ -132,13 +140,12 @@ public class PartNetResource extends NetResource {
     }
 
     private List<Part> filterInlineParts(Part part) throws MessagingException, IOException {
-        String contentType = part.getContentType().toLowerCase();
-        if(contentType.startsWith("multipart/mixed")){
+        if(part.isMimeType("multipart/mixed")){
             Multipart multiPart = (Multipart) part.getContent();
             return filterInlineParts(multiPart.getBodyPart(0));
         }
         List<Part> inLineParts = new ArrayList<>();
-        if(contentType.startsWith("multipart/related")){
+        if(part.isMimeType("multipart/related")){
             Multipart multiPart = (Multipart) part.getContent();
             int count = multiPart.getCount();
             for(int i=1;i<count;i++){
@@ -153,9 +160,8 @@ public class PartNetResource extends NetResource {
     }
 
     private List<Part> filterAttachmentParts(Part part) throws MessagingException, IOException {
-        String contentType = part.getContentType().toLowerCase();
         List<Part> attachmentParts = new ArrayList<>();
-        if(contentType.startsWith("multipart/mixed")){
+        if(part.isMimeType("multipart/mixed")){
             Multipart multiPart = (Multipart) part.getContent();
             int count = multiPart.getCount();
             for(int i=1;i<count;i++){
@@ -170,9 +176,8 @@ public class PartNetResource extends NetResource {
     }
 
     private void parseMsgPart(LocalMessage localMessage, Part part, List<LocalPart> partList) throws IOException, MessagingException {
-        String contentType = part.getContentType().toLowerCase();
         String disposition = part.getDisposition();
-        if(contentType.startsWith("multipart")){
+        if(part.isMimeType("multipart/*")){
             Multipart multiPart = (Multipart) part.getContent();
             int bodyCount = multiPart.getCount();
             for(int i=0;i<bodyCount;i++){
@@ -186,9 +191,9 @@ public class PartNetResource extends NetResource {
             if(disposition  == null){
                 //正文部分
                 parent = contentDir;
-                if(contentType.startsWith("text/html")){
+                if(part.isMimeType("text/html") || part.isMimeType("message/rfc822")){
                     localPart.setType(LocalPart.Type.HTML_CONTENT);
-                }else if(contentType.startsWith("text/plain")){
+                }else if(part.isMimeType("text/plain")){
                     localPart.setType(LocalPart.Type.TEXT_CONTENT);
                 }
             }else if(disposition.equals(Part.ATTACHMENT)){
@@ -200,33 +205,87 @@ public class PartNetResource extends NetResource {
                 parent = inlineDir;
                 localPart.setType(LocalPart.Type.INLINE);
             }
-            String originalFileName = part.getFileName();
-            String fileName;
-            if (!TextUtils.isEmpty(originalFileName) && originalFileName.matches(".*\\..*")) {
-                fileName = System.currentTimeMillis() + originalFileName.substring(originalFileName.lastIndexOf("."));
-            } else {
-                fileName = System.currentTimeMillis() + ".txt";
-            }
-            File file = new File(parent, fileName);
-//                    bodyPart.saveFile(file);//TODO:保存时需要处理编码
+
+            File file = savePartToFile(part, parent);
             localPart.setLocalPath(file.getAbsolutePath());
             localPart.setLocalUri(file.toURI().toString());
-            localPart.setDataLocation(LocalPart.LOCATION_ON_DISK);
+            localPart.setDataLocation(LocalPart.Location.LOCATION_ON_DISK);
             partList.add(localPart);
         }
     }
 
     private LocalPart convertLocalPart(Part part) throws MessagingException {
         LocalPart localPart = new LocalPart();
-        localPart.setDataLocation(LocalPart.LOCATION_MISSING);
+        localPart.setDataLocation(LocalPart.Location.LOCATION_MISSING);
+        localPart.setSize(part.getSize());
         localPart.setContentType(part.getContentType());
         localPart.setDisposition(part.getDisposition());
         localPart.setFileName(part.getFileName());
         localPart.setMimeType(part.getContentType().split(";")[0]);
+        String charset = "iso-8859-1";
+        int charsetIndex = part.getContentType().indexOf("charset=");
+        if(charsetIndex!= -1){
+            charset = part.getContentType().substring(charsetIndex + 8);
+        }
+        localPart.setCharset(charset);
         if(part instanceof MimeBodyPart){
             localPart.setContentId(((MimeBodyPart)part).getContentID());
             localPart.setEncoding(((MimeBodyPart)part).getEncoding());
         }
         return localPart;
+    }
+
+    private File savePartToFile(Part part, File dir) throws MessagingException, UnsupportedEncodingException {
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
+        String fileName = part.getFileName();
+        if(TextUtils.isEmpty(fileName)){
+            fileName = System.currentTimeMillis() + ".txt";
+        }else{
+            fileName = System.currentTimeMillis() + MimeUtility.decodeText(fileName);
+        }
+        File file = new File(dir, fileName);
+        OutputStream fos = null;
+        InputStream is = null;
+        try {
+            is = part.getInputStream();
+            if(part instanceof MimeBodyPart){
+                MimeBodyPart mimeBodyPart = (MimeBodyPart) part;
+                String encoding = mimeBodyPart.getEncoding();
+                if(encoding!=null){
+                    is = MimeUtility.decode(part.getInputStream(), mimeBodyPart.getEncoding());
+                }
+            }
+            fos = new FileOutputStream(file);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while((length = is.read(buffer)) != -1){
+                fos.write(buffer, 0, length);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return file;
     }
 }

@@ -18,18 +18,20 @@ public class LocalPart extends LitePalSupport {
         public static final String INLINE = "inline";
     }
 
-    /**
-     * 数据存储在数据库
-     */
-    public static final int LOCATION_ON_DATABASE = 1;
-    /**
-     * 数据存储在外部存储
-     */
-    public static final int LOCATION_ON_DISK = 2;
-    /**
-     * 数据遗失或未下载
-     */
-    public static final int LOCATION_MISSING = 4;
+    public static class Location{
+        /**
+         * 数据存储在数据库
+         */
+        public static final int LOCATION_ON_DATABASE = 1;
+        /**
+         * 数据存储在外部存储
+         */
+        public static final int LOCATION_ON_DISK = 2;
+        /**
+         * 数据遗失或未下载
+         */
+        public static final int LOCATION_MISSING = 4;
+    }
 
     private long id;
 
@@ -61,6 +63,8 @@ public class LocalPart extends LitePalSupport {
     private int dataLocation;
 
     private String type;
+
+    private String charset;
 
 
     public long getId() {
@@ -181,5 +185,13 @@ public class LocalPart extends LitePalSupport {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 }

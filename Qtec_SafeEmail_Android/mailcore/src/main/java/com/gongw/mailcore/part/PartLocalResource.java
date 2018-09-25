@@ -28,18 +28,23 @@ public class PartLocalResource {
     }
 
     public LocalPart getAttachPart(long localMessage_id, long index){
-        List<LocalPart> parts = LitePal.where("localmessage_id = ? and disposition = ? and index = ?", String.valueOf(localMessage_id), Part.ATTACHMENT, String.valueOf(index))
+        List<LocalPart> parts = LitePal.where("localmessage_id = ? and type = ? and index = ?", String.valueOf(localMessage_id), LocalPart.Type.ATTACHMENT, String.valueOf(index))
                 .find(LocalPart.class);
         return parts.size()>0 ? parts.get(0) : null;
     }
 
-    public List<LocalPart> getContentParts(long localMessage_id){
-        return LitePal.where("localmessage_id = ? and disposition = null", String.valueOf(localMessage_id))
+    public List<LocalPart> getHtmlContentParts(long localMessage_id){
+        return LitePal.where("localmessage_id = ? and type = ?", String.valueOf(localMessage_id), LocalPart.Type.HTML_CONTENT)
+                .find(LocalPart.class);
+    }
+
+    public List<LocalPart> getTextContentParts(long localMessage_id){
+        return LitePal.where("localmessage_id = ? and type = ?", String.valueOf(localMessage_id), LocalPart.Type.TEXT_CONTENT)
                 .find(LocalPart.class);
     }
 
     public List<LocalPart> getInLineParts(long localMessage_id){
-        return LitePal.where("localmessage_id = ? and disposition = ?", String.valueOf(localMessage_id), Part.INLINE)
+        return LitePal.where("localmessage_id = ? and type = ?", String.valueOf(localMessage_id), LocalPart.Type.INLINE)
                 .find(LocalPart.class);
     }
 

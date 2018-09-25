@@ -1,9 +1,9 @@
 package com.gongw.mailcore.message;
 
+
+import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.contact.ContactModel;
-
 import org.litepal.LitePal;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +57,53 @@ public class MessageLocalResource {
     }
 
     public void saveOrUpdateMessage(LocalMessage localMessage){
-        localMessage.saveOrUpdate("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), localMessage.getUid());
+        List<LocalMessage> localMessages = LitePal.where("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), localMessage.getUid())
+                .find(LocalMessage.class);
+        if(localMessages.size() < 1){
+            localMessage.save();
+        }else{
+            localMessage.update(localMessages.get(0).getId());
+            localMessage.setId(localMessages.get(0).getId());
+        }
+//        localMessage.saveOrUpdate("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), localMessage.getUid());
+
+        List<MessageContact> allMessageContacts = new ArrayList<>();
+        if(localMessage.getSender()!=null){
+            allMessageContacts.add(localMessage.getSender());
+        }
+        if(localMessage.getFrom()!=null){
+            allMessageContacts.addAll(localMessage.getFrom());
+        }
+        if(localMessage.getRecipientsTo()!=null){
+            allMessageContacts.addAll(localMessage.getRecipientsTo());
+        }
+        if(localMessage.getRecipientsCc()!=null){
+            allMessageContacts.addAll(localMessage.getRecipientsCc());
+        }
+        if(localMessage.getRecipientsBcc()!=null){
+            allMessageContacts.addAll(localMessage.getRecipientsBcc());
+        }
+        if(localMessage.getReplyTo()!=null){
+            allMessageContacts.addAll(localMessage.getReplyTo());
+        }
+        for(MessageContact messageContact : allMessageContacts){
+            Contact contact = messageContact.getContact();
+
+            ContactModel.singleInstance().saveOrUpdateContact(contact);
+            contact = ContactModel.singleInstance().getContactById(contact.getId());
+            messageContact.setContact(contact);
+
+            List<MessageContact> messageContacts = LitePal.where("localmessage_id = ? and contact_id = ? and type = ?",
+                                                    localMessage.getId()+"",
+                                                    contact.getId()+"",
+                                                    messageContact.getType())
+                                                    .find(MessageContact.class);
+            if(messageContacts.size() < 1){
+                messageContact.save();
+            }else{
+                messageContact.setId(messageContacts.get(0).getId());
+            }
+        }
     }
 
     public void deleteMessageById(long id){
