@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import com.gongw.mailcore.net.MessageFetcher;
 import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.message.LocalMessage;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -75,42 +74,42 @@ public class PartNetResource extends NetResource {
         return InstanceHolder.instance;
     }
 
-    public List<LocalPart> getAllParts(LocalMessage localMessage) throws MessagingException, IOException {
+    public List<LocalPart> getAllParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
-        parseMsgPart(localMessage, message, localParts);
+        parseMsgPart(localMessage, message, localParts, saveToLocal);
         return localParts;
     }
 
-    public List<LocalPart> getContentParts(LocalMessage localMessage) throws MessagingException, IOException {
+    public List<LocalPart> getContentParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
         List<Part> contentParts = filterContentPart(message);
         for(Part part : contentParts){
-            parseMsgPart(localMessage, part, localParts);
+            parseMsgPart(localMessage, part, localParts, saveToLocal);
         }
         return localParts;
     }
 
-    public List<LocalPart> getInlineParts(LocalMessage localMessage) throws MessagingException, IOException {
+    public List<LocalPart> getInlineParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
         List<Part> inlineParts = filterInlineParts(message);
         for(Part part : inlineParts){
-            parseMsgPart(localMessage, part, localParts);
+            parseMsgPart(localMessage, part, localParts, saveToLocal);
         }
         return localParts;
     }
 
-    public LocalPart getAttachmentPartByIndex(LocalMessage localMessage, int index) throws MessagingException, IOException {
+    public LocalPart getAttachmentPartByIndex(LocalMessage localMessage, int index, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
         List<Part> attachmentParts = filterAttachmentParts(message);
-        parseMsgPart(localMessage, attachmentParts.get(index), localParts);
+        parseMsgPart(localMessage, attachmentParts.get(index), localParts, saveToLocal);
         return localParts.get(0);
     }
 
@@ -173,46 +172,24 @@ public class PartNetResource extends NetResource {
         return attachmentParts;
     }
 
-    private void parseMsgPart(LocalMessage localMessage, Part part, List<LocalPart> partList) throws IOException, MessagingException {
-        String disposition = part.getDisposition();
+    private void parseMsgPart(LocalMessage localMessage, Part part, List<LocalPart> partList, boolean saveToLocal) throws IOException, MessagingException {
         if(part.isMimeType("multipart/*")){
             Multipart multiPart = (Multipart) part.getContent();
             int bodyCount = multiPart.getCount();
             for(int i=0;i<bodyCount;i++){
                 BodyPart bodyPart = multiPart.getBodyPart(i);
-                parseMsgPart(localMessage, bodyPart, partList);
+                parseMsgPart(localMessage, bodyPart, partList, saveToLocal);
             }
         }else {
-            LocalPart localPart = convertLocalPart(part);
-            localPart.setLocalMessage(localMessage);
-            File parent = defaultDir;
-            if(disposition  == null){
-                //正文部分
-                parent = contentDir;
-                if(part.isMimeType("text/html") || part.isMimeType("message/rfc822")){
-                    localPart.setType(LocalPart.Type.HTML_CONTENT);
-                }else if(part.isMimeType("text/plain")){
-                    localPart.setType(LocalPart.Type.TEXT_CONTENT);
-                }
-            }else if(disposition.equals(Part.ATTACHMENT)){
-                //附件部分
-                parent = attachmentDir;
-                localPart.setType(LocalPart.Type.ATTACHMENT);
-            }else if(disposition.equals(Part.INLINE)){
-                //正文引用
-                parent = inlineDir;
-                localPart.setType(LocalPart.Type.INLINE);
+            LocalPart localPart = convertLocalPart(part, localMessage);
+            if(saveToLocal){
+                savePartToFile(part, localPart);
             }
-
-            File file = savePartToFile(part, parent);
-            localPart.setLocalPath(file.getAbsolutePath());
-            localPart.setLocalUri(file.toURI().toString());
-            localPart.setDataLocation(LocalPart.Location.LOCATION_ON_DISK);
             partList.add(localPart);
         }
     }
 
-    private LocalPart convertLocalPart(Part part) throws MessagingException {
+    private LocalPart convertLocalPart(Part part, LocalMessage localMessage) throws MessagingException {
         LocalPart localPart = new LocalPart();
         localPart.setDataLocation(LocalPart.Location.LOCATION_MISSING);
         localPart.setSize(part.getSize());
@@ -230,12 +207,38 @@ public class PartNetResource extends NetResource {
             localPart.setContentId(((MimeBodyPart)part).getContentID());
             localPart.setEncoding(((MimeBodyPart)part).getEncoding());
         }
+        String disposition = part.getDisposition();
+        if(disposition  == null){
+            //正文part
+            if(part.isMimeType("text/html") || part.isMimeType("message/rfc822")){
+                localPart.setType(LocalPart.Type.HTML_CONTENT);
+            }else if(part.isMimeType("text/plain")){
+                localPart.setType(LocalPart.Type.TEXT_CONTENT);
+            }
+        }else if(disposition.equals(Part.ATTACHMENT)){
+            //附件part
+            localPart.setType(LocalPart.Type.ATTACHMENT);
+        }else if(disposition.equals(Part.INLINE)){
+            //正文引用part
+            localPart.setType(LocalPart.Type.INLINE);
+        }
+        localPart.setLocalMessage(localMessage);
         return localPart;
     }
 
-    private File savePartToFile(Part part, File dir) throws MessagingException, UnsupportedEncodingException {
-        if(!dir.exists()){
-            dir.mkdirs();
+    private void savePartToFile(Part part, LocalPart localPart) throws MessagingException, UnsupportedEncodingException {
+        File dir = defaultDir;
+        switch (localPart.getType()){
+            case LocalPart.Type.HTML_CONTENT:
+            case LocalPart.Type.TEXT_CONTENT:
+                dir = contentDir;
+                break;
+            case LocalPart.Type.INLINE:
+                dir = inlineDir;
+                break;
+            case LocalPart.Type.ATTACHMENT:
+                dir = attachmentDir;
+                break;
         }
         String fileName = part.getFileName();
         if(TextUtils.isEmpty(fileName)){
@@ -256,12 +259,14 @@ public class PartNetResource extends NetResource {
                 }
             }
             fos = new FileOutputStream(file);
-
             byte[] buffer = new byte[1024];
             int length;
             while((length = is.read(buffer)) != -1){
                 fos.write(buffer, 0, length);
             }
+            localPart.setLocalPath(file.getAbsolutePath());
+            localPart.setLocalUri(file.toURI().toString());
+            localPart.setDataLocation(LocalPart.Location.LOCATION_ON_DISK);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
@@ -284,6 +289,5 @@ public class PartNetResource extends NetResource {
                 e.printStackTrace();
             }
         }
-        return file;
     }
 }

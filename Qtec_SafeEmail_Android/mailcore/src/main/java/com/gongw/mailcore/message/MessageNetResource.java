@@ -1,5 +1,7 @@
 package com.gongw.mailcore.message;
 
+import android.util.Log;
+
 import com.gongw.mailcore.net.MessageFetcher;
 import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.contact.Contact;
@@ -19,6 +21,8 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.event.MessageChangedEvent;
+import javax.mail.event.MessageChangedListener;
 import javax.mail.internet.InternetAddress;
 
 /**
@@ -49,7 +53,18 @@ public class MessageNetResource extends NetResource{
         Folder folder = messages[0].getFolder();
         FetchProfile fetchProfile = new FetchProfile();
         fetchProfile.add(FetchProfile.Item.ENVELOPE);
+        folder.addMessageChangedListener(new MessageChangedListener() {
+            @Override
+            public void messageChanged(MessageChangedEvent e) {
+                try {
+                    Log.d("TAG", "MessageChangedEvent for"+e.getMessage().getSubject());
+                } catch (MessagingException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
         folder.fetch(messages, fetchProfile);
+
 
         for(Message message : messages){
             LocalMessage localMessage = new LocalMessage();
