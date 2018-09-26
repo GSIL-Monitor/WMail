@@ -1,16 +1,13 @@
 package com.gongw.mailcore.message;
 
-import com.gongw.mailcore.MailFetcher;
-import com.gongw.mailcore.NetResource;
+import com.gongw.mailcore.net.MessageFetcher;
+import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.contact.Contact;
-import com.gongw.mailcore.contact.ContactModel;
 import com.gongw.mailcore.folder.LocalFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Message;
-
-import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +41,7 @@ public class MessageNetResource extends NetResource{
 
     public List<LocalMessage> fetchMessages(LocalFolder localFolder, int start, int end) throws MessagingException, IOException {
         List<LocalMessage> localMessageList = new ArrayList<>();
-        MailFetcher fetcher = getFetcher(localFolder.getAccount());
+        MessageFetcher fetcher = getFetcher(localFolder.getAccount());
         Message[] messages = fetcher.fetchMessages(localFolder.getFullName(), start, end);
         if(messages.length < 1){
             return localMessageList;

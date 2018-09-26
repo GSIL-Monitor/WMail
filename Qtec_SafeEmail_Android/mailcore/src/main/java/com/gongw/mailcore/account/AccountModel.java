@@ -41,9 +41,13 @@ public class AccountModel {
     }
 
     public void saveOrUpdateAccount(Account account){
-        account.saveOrUpdate("email = ?", account.getEmail());
-        List<Account> accountList = getAccountsByEmail(account.getEmail());
-        account.setId(accountList.get(0).getId());
+        List<Account> accounts = LitePal.where("email = ?", account.getEmail())
+                                        .find(Account.class);
+        if(accounts.size() < 1){
+            account.save();
+        }else{
+            account.update(accounts.get(0).getId());
+        }
     }
 
     public void deleteById(int id){

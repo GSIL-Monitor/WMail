@@ -46,7 +46,13 @@ public class FolderLocalResource {
     }
 
     public void saveOrUpdateFolder(LocalFolder localFolder){
-        localFolder.saveOrUpdate("url = ?", localFolder.getUrl());
+        List<LocalFolder> localFolders = LitePal.where("url = ?", localFolder.getUrl())
+                                                .find(LocalFolder.class);
+        if(localFolders.size() < 1){
+            localFolder.save();
+        }else{
+            localFolder.update(localFolders.get(0).getId());
+        }
     }
 
     public void deleteFolderById(long id){

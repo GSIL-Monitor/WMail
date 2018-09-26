@@ -15,13 +15,19 @@ import com.gongw.mailcore.account.AccountModel;
 import com.gongw.mailcore.folder.FolderModel;
 import com.gongw.mailcore.folder.LocalFolder;
 import com.gongw.mailcore.message.LocalMessage;
+import com.gongw.mailcore.message.MessageBuilder;
 import com.gongw.mailcore.message.MessageModel;
+import com.gongw.mailcore.net.MessageFetcher;
+import com.gongw.mailcore.net.MessageSender;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.Address;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 
 /**
@@ -111,6 +117,16 @@ public class MessageViewListFragment extends ListFragment {
                             updateResult();
                         }
                     });
+
+
+//                    Address[] to = new Address[]{new InternetAddress("gongw@qtec.cn", "龚伟")};
+//                    MimeMessage message = new MessageBuilder().subject("测试javamail发送邮件")
+//                                                                .to(to)
+//                                                                .content("测试邮件Text正文")
+//                                                                .sender(to[0])
+//                                                                .build();
+//                    new MessageSender(account.getTransportUrl()).sendMsg(message);
+
                 } catch (MessagingException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -195,8 +211,6 @@ public class MessageViewListFragment extends ListFragment {
     }
 
     private void updateResult() {
-
-        Log.d("msglist", "update result");
         ArrayList<MessageAdapter> array = new ArrayList();
         for(LocalMessage msg : messages) {
             MessageAdapter msgAdapter = new MessageAdapter(msg);

@@ -1,6 +1,5 @@
-package com.gongw.mailcore;
+package com.gongw.mailcore.net;
 
-import com.gongw.mailcore.setting.MailSession;
 import com.sun.mail.imap.IMAPFolder;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -15,10 +14,10 @@ import javax.mail.URLName;
  * Created by gongw on 2018/8/30.
  */
 
-public class MailFetcher {
+public class MessageFetcher {
     private Store store;
 
-    public MailFetcher(String storeUrl) throws MessagingException {
+    public MessageFetcher(String storeUrl) throws MessagingException {
         setStoreUrlName(storeUrl);
     }
 
@@ -34,16 +33,26 @@ public class MailFetcher {
     public void setStoreUrlName(String storeUrl) throws MessagingException {
         URLName urlName = new URLName(storeUrl);
         this.store = MailSession.getDefaultSession().getStore(urlName);
-        checkConnect();
+        connect();
     }
 
     /**
      * 检查是否已建立连接，如果没有则自动连接
      * @throws MessagingException
      */
-    public void checkConnect() throws MessagingException {
+    public void connect() throws MessagingException {
         if(!store.isConnected()){
             store.connect();
+        }
+    }
+
+    /**
+     * 检查是否已建立连接，如果有则调用close断开
+     * @throws MessagingException
+     */
+    public void close() throws MessagingException {
+        if(store.isConnected()){
+            store.close();
         }
     }
     
@@ -53,7 +62,7 @@ public class MailFetcher {
      * @throws MessagingException
      */
     public Folder[] fetchFolders() throws MessagingException {
-        checkConnect();
+        connect();
         return store.getDefaultFolder().list();
     }
 
@@ -65,7 +74,7 @@ public class MailFetcher {
      * @throws MessagingException
      */
     public Folder openFolder(String fullName, int mode) throws MessagingException {
-        checkConnect();
+        connect();
         Folder folder = store.getFolder(fullName);
         if(!folder.isOpen() || folder.getMode() != mode){
             folder.open(mode);
@@ -79,7 +88,7 @@ public class MailFetcher {
      * @throws MessagingException
      */
     public void closeFolder(String fullName) throws MessagingException {
-        checkConnect();
+        connect();
         Folder folder = store.getFolder(fullName);
         if(folder.isOpen()){
             folder.close();

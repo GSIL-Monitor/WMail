@@ -1,4 +1,4 @@
-package com.gongw.mailcore;
+package com.gongw.mailcore.net;
 
 import com.gongw.mailcore.account.Account;
 
@@ -15,7 +15,7 @@ public class NetResource {
     /**
      * 以email,MailFetcher键值对形式缓存的MailFetcher
      */
-    protected Map<String, MailFetcher> fetcherMap;
+    protected Map<String, MessageFetcher> fetcherMap;
 
     /**
      * 获取缓存的该邮箱的MailFetcher
@@ -23,14 +23,14 @@ public class NetResource {
      * @return MailFetcher对象
      * @throws MessagingException
      */
-    protected MailFetcher getFetcher(Account account) throws MessagingException {
+    protected MessageFetcher getFetcher(Account account) throws MessagingException {
         if(fetcherMap == null){
             fetcherMap = new HashMap<>();
         }
         String email = account.getEmail();
         String storeUrl = account.getStoreUrl();
         if(!fetcherMap.containsKey(email) || !fetcherMap.get(email).getStoreUrl().equals(storeUrl)){
-            MailFetcher fetcher = new MailFetcher(storeUrl);
+            MessageFetcher fetcher = new MessageFetcher(storeUrl);
             fetcherMap.put(email, fetcher);
         }
         return fetcherMap.get(email);

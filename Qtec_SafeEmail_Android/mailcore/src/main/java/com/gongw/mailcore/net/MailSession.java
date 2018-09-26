@@ -1,4 +1,4 @@
-package com.gongw.mailcore.setting;
+package com.gongw.mailcore.net;
 
 
 import java.util.Properties;
@@ -22,7 +22,7 @@ public class MailSession {
                 return super.getPasswordAuthentication();
             }
         });
-        session.setDebug(false);
+        session.setDebug(true);
     }
 
     private static class SessionHolder{

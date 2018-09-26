@@ -2,11 +2,9 @@ package com.gongw.mailcore.part;
 
 import android.os.Environment;
 import android.text.TextUtils;
-import com.gongw.mailcore.MailFetcher;
-import com.gongw.mailcore.NetResource;
+import com.gongw.mailcore.net.MessageFetcher;
+import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.message.LocalMessage;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -78,7 +76,7 @@ public class PartNetResource extends NetResource {
     }
 
     public List<LocalPart> getAllParts(LocalMessage localMessage) throws MessagingException, IOException {
-        MailFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
+        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
         parseMsgPart(localMessage, message, localParts);
@@ -86,7 +84,7 @@ public class PartNetResource extends NetResource {
     }
 
     public List<LocalPart> getContentParts(LocalMessage localMessage) throws MessagingException, IOException {
-        MailFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
+        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
         List<Part> contentParts = filterContentPart(message);
@@ -97,7 +95,7 @@ public class PartNetResource extends NetResource {
     }
 
     public List<LocalPart> getInlineParts(LocalMessage localMessage) throws MessagingException, IOException {
-        MailFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
+        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
         List<Part> inlineParts = filterInlineParts(message);
@@ -108,7 +106,7 @@ public class PartNetResource extends NetResource {
     }
 
     public LocalPart getAttachmentPartByIndex(LocalMessage localMessage, int index) throws MessagingException, IOException {
-        MailFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
+        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
         Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
         List<Part> attachmentParts = filterAttachmentParts(message);

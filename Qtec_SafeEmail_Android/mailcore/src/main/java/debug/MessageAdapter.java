@@ -14,6 +14,6 @@ public class MessageAdapter {
     }
 
     public String toString() {
-        return message.getSender().getContact().getPersonalName() + " " + message.getSubject();
+        return message.getSubject();
     }
 }

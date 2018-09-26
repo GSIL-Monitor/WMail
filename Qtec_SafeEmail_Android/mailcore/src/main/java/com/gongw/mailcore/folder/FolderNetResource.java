@@ -1,7 +1,7 @@
 package com.gongw.mailcore.folder;
 
-import com.gongw.mailcore.MailFetcher;
-import com.gongw.mailcore.NetResource;
+import com.gongw.mailcore.net.MessageFetcher;
+import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.account.Account;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ public class FolderNetResource extends NetResource{
      * @throws MessagingException
      */
     public List<LocalFolder> getAllFolders(Account account) throws MessagingException {
-        MailFetcher fetcher = getFetcher(account);
+        MessageFetcher fetcher = getFetcher(account);
         List<LocalFolder> localFolders = new ArrayList<>();
         Folder[] folders = fetcher.fetchFolders();
         for(Folder folder : folders){

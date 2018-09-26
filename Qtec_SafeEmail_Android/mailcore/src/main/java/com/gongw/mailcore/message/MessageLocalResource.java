@@ -65,7 +65,6 @@ public class MessageLocalResource {
             localMessage.update(localMessages.get(0).getId());
             localMessage.setId(localMessages.get(0).getId());
         }
-//        localMessage.saveOrUpdate("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), localMessage.getUid());
 
         List<MessageContact> allMessageContacts = new ArrayList<>();
         if(localMessage.getSender()!=null){

@@ -27,7 +27,7 @@ public enum ConnectType {
                 return connectType;
             }
         }
-        throw new RuntimeException("no checkConnect type found："+type);
+        throw new RuntimeException("no connect type found："+type);
     }
 
 }
