@@ -80,7 +80,7 @@ public class MessageViewDetailFragment extends Fragment {
                 @Override
                 public void run() {
                     try {
-                        List<LocalPart> contentParts = PartModel.singleInstance().getContentParts(message);
+                        List<LocalPart> contentParts = PartModel.singleInstance().getContentParts(message, true);
                         final LocalPart htmlPart = contentParts.get(0);
                         InputStream fis = new FileInputStream(htmlPart.getLocalPath());
                         byte[] datas = new byte[fis.available()];

@@ -3,9 +3,12 @@ package com.gongw.mailcore.message;
 
 import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.contact.ContactModel;
+import com.gongw.mailcore.folder.LocalFolder;
+
 import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
+import javax.mail.Flags;
 
 /**
  * Created by gongw on 2018/7/17.
@@ -57,7 +60,7 @@ public class MessageLocalResource {
     }
 
     public void saveOrUpdateMessage(LocalMessage localMessage){
-        List<LocalMessage> localMessages = LitePal.where("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), localMessage.getUid())
+        List<LocalMessage> localMessages = LitePal.where("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), String.valueOf(localMessage.getUid()))
                 .find(LocalMessage.class);
         if(localMessages.size() < 1){
             localMessage.save();
@@ -117,6 +120,50 @@ public class MessageLocalResource {
         LitePal.deleteAll(LocalMessage.class);
     }
 
+    public void flagMessage(List<LocalMessage> localMessages, Flags.Flag flag, boolean set){
+        for(LocalMessage localMessage : localMessages){
+            if(flag == Flags.Flag.DRAFT){
+                localMessage.setDraft(set);
+            }
+            if(flag == Flags.Flag.ANSWERED){
+                localMessage.setAnswered(set);
+            }
+            if(flag == Flags.Flag.USER){
+                localMessage.setUser(set);
+            }
+            if(flag == Flags.Flag.SEEN){
+                localMessage.setSeen(set);
+            }
+            if(flag == Flags.Flag.RECENT){
+                localMessage.setRecent(set);
+            }
+            if(flag == Flags.Flag.FLAGGED){
+                localMessage.setFlagged(set);
+            }
+            if(flag == Flags.Flag.DELETED){
+                localMessage.setDeleted(set);
+            }
+            localMessage.update(localMessage.getId());
+        }
+
+    }
+
+    public void deleteMessages(List<LocalMessage> localMessages) {
+        for(LocalMessage localMessage : localMessages){
+            LitePal.delete(LocalMessage.class, localMessage.getId());
+        }
+    }
+
+    public void moveMessages(List<LocalMessage> localMessages, LocalFolder destFolder){
+        if(destFolder == null || localMessages == null){
+            return;
+        }
+        for(LocalMessage localMessage : localMessages){
+            localMessage.setFolder(destFolder);
+            localMessage.update(localMessage.getId());
+        }
+    }
+
     private void fillMessageContacts(LocalMessage localMessage){
         List<MessageContact> messageContacts = LitePal.where("localmessage_id = ?", String.valueOf(localMessage.getId()))
                 .find(MessageContact.class, true);
@@ -157,4 +204,5 @@ public class MessageLocalResource {
         }
 
     }
+
 }

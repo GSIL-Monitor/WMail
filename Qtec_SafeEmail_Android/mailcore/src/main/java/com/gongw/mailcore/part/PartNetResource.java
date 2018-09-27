@@ -77,7 +77,7 @@ public class PartNetResource extends NetResource {
     public List<LocalPart> getAllParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
+        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
         parseMsgPart(localMessage, message, localParts, saveToLocal);
         return localParts;
     }
@@ -85,7 +85,7 @@ public class PartNetResource extends NetResource {
     public List<LocalPart> getContentParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
+        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
         List<Part> contentParts = filterContentPart(message);
         for(Part part : contentParts){
             parseMsgPart(localMessage, part, localParts, saveToLocal);
@@ -96,7 +96,7 @@ public class PartNetResource extends NetResource {
     public List<LocalPart> getInlineParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
+        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
         List<Part> inlineParts = filterInlineParts(message);
         for(Part part : inlineParts){
             parseMsgPart(localMessage, part, localParts, saveToLocal);
@@ -107,7 +107,7 @@ public class PartNetResource extends NetResource {
     public LocalPart getAttachmentPartByIndex(LocalMessage localMessage, int index, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), Long.parseLong(localMessage.getUid()));
+        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
         List<Part> attachmentParts = filterAttachmentParts(message);
         parseMsgPart(localMessage, attachmentParts.get(index), localParts, saveToLocal);
         return localParts.get(0);

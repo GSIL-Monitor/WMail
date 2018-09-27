@@ -13,6 +13,15 @@ import java.util.List;
 
 public class LocalFolder extends LitePalSupport {
 
+    public static class Type {
+        public static final String INBOX = "inbox";
+        public static final String SENT = "sent";
+        public static final String DRAFT = "draft";
+        public static final String TRASH = "trash";
+        public static final String DELETED = "deleted";
+        public static final String JUNK = "junk";
+    }
+
     private long id;
     @Column(nullable = false)
     private Account account;
@@ -22,6 +31,8 @@ public class LocalFolder extends LitePalSupport {
 
     @Column(nullable = false)
     private String fullName;
+
+    private String localType;
 
     private int type;
 
@@ -103,5 +114,13 @@ public class LocalFolder extends LitePalSupport {
 
     public void setMessageList(List<LocalMessage> messageList) {
         this.messageList = messageList;
+    }
+
+    public String getLocalType() {
+        return localType;
+    }
+
+    public void setLocalType(String localType) {
+        this.localType = localType;
     }
 }

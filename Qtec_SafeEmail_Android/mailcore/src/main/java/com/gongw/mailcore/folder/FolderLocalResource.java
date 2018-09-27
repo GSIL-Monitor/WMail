@@ -39,6 +39,17 @@ public class FolderLocalResource {
         return LitePal.find(LocalFolder.class, id);
     }
 
+    public LocalFolder getTrashOrDeletedFolder(long accountId){
+        List<LocalFolder> localFolders = getFoldersByAccountId(accountId);
+        for(LocalFolder localFolder : localFolders){
+            String localType = localFolder.getLocalType();
+            if(LocalFolder.Type.TRASH.equals(localType) || LocalFolder.Type.DELETED.equals(localType)){
+                return localFolder;
+            }
+        }
+        return null;
+    }
+
     public void saveOrUpdateFolder(List<LocalFolder> folderList){
         for(LocalFolder localFolder : folderList){
             saveOrUpdateFolder(localFolder);

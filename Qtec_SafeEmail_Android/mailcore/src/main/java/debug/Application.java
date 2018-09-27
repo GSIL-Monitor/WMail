@@ -30,5 +30,15 @@ public class Application extends BaseApplication {
             account.setAvailable(true);
             AccountModel.singleInstance().saveOrUpdateAccount(account);
 
+//        Account account = new Account();
+//        URLName urlName = new URLName("imaps", "imap.139.com", 993, null, "15079193126@139.com", "Gogowei1992");
+//        URLName urlName1 = new URLName("smtps", "smtp.139.com", 465, null, "15079193126@139.com", "Gogowei1992");
+//        account.setStoreUrl(urlName.toString());
+//        account.setTransportUrl(urlName1.toString());
+//        account.setEmail("15079193126@139.com");
+//        account.setPassword("Gogowei1992");
+//        account.setAvailable(true);
+//        AccountModel.singleInstance().saveOrUpdateAccount(account);
+
     }
 }

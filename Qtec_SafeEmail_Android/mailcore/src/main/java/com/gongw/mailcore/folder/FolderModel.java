@@ -44,6 +44,16 @@ public class FolderModel {
         folderLocalResource.saveOrUpdateFolder(folders);
     }
 
-
+    public LocalFolder getTrashOrDeletedFolder(Account account) throws MessagingException {
+        LocalFolder localFolder = folderLocalResource.singleInstance().getTrashOrDeletedFolder(account.getId());
+        if(localFolder == null){
+            refreshFolders(account);
+            localFolder = folderLocalResource.singleInstance().getTrashOrDeletedFolder(account.getId());
+        }
+        if(localFolder != null){
+            localFolder.setAccount(account);
+        }
+        return localFolder;
+    }
 
 }

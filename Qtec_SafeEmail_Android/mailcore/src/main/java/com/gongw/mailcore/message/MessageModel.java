@@ -1,12 +1,16 @@
 package com.gongw.mailcore.message;
 
+import com.gongw.mailcore.account.Account;
 import com.gongw.mailcore.folder.FolderModel;
 import com.gongw.mailcore.folder.LocalFolder;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import javax.mail.Address;
+import javax.mail.Flags;
 import javax.mail.MessagingException;
 
 /**
@@ -66,5 +70,42 @@ public class MessageModel {
         localResource.saveOrUpdateMessages(localMessages);
     }
 
+    public void flagMessages(List<LocalMessage> localMessages, Flags.Flag flag, boolean set) throws MessagingException {
+        netResource.flagMessages(localMessages, flag, set);
+        localResource.flagMessage(localMessages, flag, set);
+    }
+
+    public void deleteMessages(List<LocalMessage> localMessages, boolean eager) throws MessagingException {
+        //如果是彻底删除，则不论在哪个文件夹都直接删除
+        if(eager){
+            netResource.deleteMessages(localMessages);
+            localResource.deleteMessages(localMessages);
+        }else {
+            //按Folder Url划分,区分不同账号不同文件夹的邮件
+            Map<String, List<LocalMessage>> messageMap = new HashMap<>();
+            for(LocalMessage localMessage : localMessages){
+                String folderUrl = localMessage.getFolder().getUrl();
+                if(!messageMap.containsKey(folderUrl)){
+                    List<LocalMessage> messages = new ArrayList<>();
+                    messageMap.put(folderUrl, messages);
+                }
+                messageMap.get(folderUrl).add(localMessage);
+            }
+            for(Iterator<List<LocalMessage>> iterator = messageMap.values().iterator(); iterator.hasNext();) {
+                List<LocalMessage> messages = iterator.next();
+                Account account = messages.get(0).getFolder().getAccount();
+                String localFolderType = messages.get(0).getFolder().getLocalType();
+                //如果不是已删除，垃圾箱的邮件则将邮件移动到已删除文件夹
+                if(!LocalFolder.Type.DELETED.equals(localFolderType) && !LocalFolder.Type.TRASH.equals(localFolderType) && !LocalFolder.Type.JUNK.equals(localFolderType)){
+                    LocalFolder destFolder = FolderModel.singleInstance().getTrashOrDeletedFolder(account);
+                    netResource.moveMessages(messages, destFolder);
+                    localResource.moveMessages(messages, destFolder);
+                }else{
+                    netResource.deleteMessages(messages);
+                    localResource.deleteMessages(messages);
+                }
+            }
+        }
+    }
 
 }

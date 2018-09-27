@@ -169,7 +169,13 @@ public class MessageFetcher {
      * @throws MessagingException
      */
     public void deleteMessages(String folderName, long[] uids) throws MessagingException {
-       flagMessages(folderName, uids, new Flags(Flags.Flag.DELETED), true);
+        Folder folder = openFolder(folderName, Folder.READ_WRITE);
+        if(folder instanceof IMAPFolder){
+            IMAPFolder imapFolder = (IMAPFolder) folder;
+            Message[] msgArray = imapFolder.getMessagesByUID(uids);
+            imapFolder.setFlags(msgArray,  new Flags(Flags.Flag.DELETED), true);
+        }
+        folder.expunge();
     }
 
     /**
@@ -187,7 +193,6 @@ public class MessageFetcher {
             IMAPFolder imapFolder = (IMAPFolder) folder;
             Message[] msgArray = imapFolder.getMessagesByUID(uids);
             imapFolder.setFlags(msgArray, flags, set);
-            imapFolder.expunge();
         }
     }
 
