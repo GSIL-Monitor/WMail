@@ -7,9 +7,9 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 
 /**
+ * 利用单例模式维护全局唯一的Session对象
  * Created by gongw on 2018/8/30.
  */
-
 public class MailSession {
 
     private Session session;

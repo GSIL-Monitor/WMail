@@ -8,21 +8,39 @@ import java.util.List;
 
 
 /**
+ * 账号类，用于保存邮箱账号信息以及登录信息
  * Created by gongw on 2018/8/30.
  */
 
 public class Account extends LitePalSupport{
 
     private long id;
+    /**
+     * 邮箱账号
+     */
     @Column(unique = true, nullable = false)
     private String email;
-    //storeUrl and transportUrl can use URLName.toString() format
+    /**
+     * 包含获取邮箱信息的imap或pop协议，域名，端口号，用户名，密码，文件名
+     * 格式与URLName.toString()一致
+     */
     private String storeUrl;
+    /**
+     * 包含发送邮件的的smtp协议，域名，端口号，用户名，密码，文件名
+     * 格式与URLName.toString()一致
+     */
     private String transportUrl;
+    /**
+     * 邮箱密码
+     */
     private String password;
-    private String userName;
+    /**
+     * 邮箱是否可用
+     */
     private boolean isAvailable = true;
-
+    /**
+     * 邮箱下包含的文件夹集合
+     */
     private List<LocalFolder> folderList;
 
     public long getId() {
@@ -63,14 +81,6 @@ public class Account extends LitePalSupport{
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public boolean isAvailable() {

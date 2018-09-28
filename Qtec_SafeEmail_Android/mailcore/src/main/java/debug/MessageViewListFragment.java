@@ -15,19 +15,13 @@ import com.gongw.mailcore.account.AccountModel;
 import com.gongw.mailcore.folder.FolderModel;
 import com.gongw.mailcore.folder.LocalFolder;
 import com.gongw.mailcore.message.LocalMessage;
-import com.gongw.mailcore.message.MessageBuilder;
 import com.gongw.mailcore.message.MessageModel;
-import com.gongw.mailcore.net.MessageFetcher;
-import com.gongw.mailcore.net.MessageSender;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.mail.Address;
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 
 /**
@@ -110,7 +104,7 @@ public class MessageViewListFragment extends ListFragment {
                             break;
                         }
                     }
-                    messages = MessageModel.singleInstance().getMessages(inboxFolder, 0);
+                    messages = MessageModel.singleInstance().getMessagesByPage(inboxFolder, 0);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

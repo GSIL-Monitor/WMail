@@ -10,6 +10,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 
 /**
+ * 网络上的邮箱文件夹资源类，提供操作网络上的Folder数据的接口
  * Created by gongw on 2018/9/11.
  */
 
@@ -27,8 +28,8 @@ public class FolderNetResource extends NetResource{
     }
 
     /**
-     * 获取该邮箱下所有文件夹
-     * @param account 邮箱账号信息
+     * 获取指定Account下所有文件夹
+     * @param account 邮箱账号信息Account
      * @return LocalFolder对象列表
      * @throws MessagingException
      */
@@ -47,6 +48,13 @@ public class FolderNetResource extends NetResource{
         return localFolders;
     }
 
+    /**
+     * 将Folder对象转换为LocalFolder对象
+     * @param account 邮箱账号信息Account
+     * @param folder 从网络上获取的文件夹类
+     * @return LocalFolder
+     * @throws MessagingException
+     */
     private LocalFolder convertLocalFolder(Account account, Folder folder) throws MessagingException {
         LocalFolder localFolder = new LocalFolder();
         localFolder.setAccount(account);

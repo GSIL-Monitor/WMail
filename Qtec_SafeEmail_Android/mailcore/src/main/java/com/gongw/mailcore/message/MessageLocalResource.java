@@ -4,16 +4,15 @@ package com.gongw.mailcore.message;
 import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.contact.ContactModel;
 import com.gongw.mailcore.folder.LocalFolder;
-
 import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Flags;
 
 /**
+ * 本地的邮件资源，以数据库的形式保存LocalMessage，并提供操作数据库中LocalMessage数据的接口
  * Created by gongw on 2018/7/17.
  */
-
 public class MessageLocalResource {
 
     private static class InstanceHolder{
@@ -27,12 +26,24 @@ public class MessageLocalResource {
         return InstanceHolder.instance;
     }
 
+    /**
+     * 获取指定id的邮件
+     * @param id 指定的id
+     * @return LocalMessage
+     */
     public LocalMessage getMessageById(long id){
         LocalMessage message = LitePal.find(LocalMessage.class, id);
         fillMessageContacts(message);
         return message;
     }
 
+    /**
+     * 获取指定文件夹下的邮件
+     * @param folderId 文件夹id
+     * @param limit 获取的邮件数量
+     * @param offset 从指定位置开始获取
+     * @return LocalMessage集合
+     */
     public List<LocalMessage> getMessagesByFolderId(long folderId, int limit, int offset){
         List<LocalMessage> messages = LitePal.where("localfolder_id = ?", String.valueOf(folderId))
                 .limit(limit)
@@ -46,19 +57,22 @@ public class MessageLocalResource {
         return messages;
     }
 
-    public int getMsgCountByFolderId(long folderId, int limit, int offset){
-        return LitePal.where("localfolder_id = ?", String.valueOf(folderId))
-                .limit(limit)
-                .offset(offset)
-                .count(LocalMessage.class);
-    }
-
+    /**
+     * 批量保存或修改邮件到数据库
+     * @param localMessages LocalMessage集合
+     */
     public void saveOrUpdateMessages(List<LocalMessage> localMessages){
         for(LocalMessage localMessage : localMessages){
             saveOrUpdateMessage(localMessage);
         }
     }
 
+    /**
+     * 保存或修改邮件
+     * 如果邮件的文件夹id和uid都已存在，则为修改操作，否则保存
+     * 保存邮件时，将邮件中包含的联系人，以及联系人在邮件中的类型信息也保存到对应表
+     * @param localMessage LocalMessage
+     */
     public void saveOrUpdateMessage(LocalMessage localMessage){
         List<LocalMessage> localMessages = LitePal.where("localfolder_id = ? and uid = ?", String.valueOf(localMessage.getFolder().getId()), String.valueOf(localMessage.getUid()))
                 .find(LocalMessage.class);
@@ -108,18 +122,35 @@ public class MessageLocalResource {
         }
     }
 
+    /**
+     * 删除指定id的LocalMessage
+     * @param id id
+     */
     public void deleteMessageById(long id){
         LitePal.delete(LocalMessage.class, id);
     }
 
+    /**
+     * 删除指定文件夹的邮件
+     * @param folderId 文件夹id
+     */
     public void deleteMessagesByFolderId(long folderId){
         LitePal.deleteAll(LocalMessage.class, "localfolder_id = ?", String.valueOf(folderId));
     }
 
+    /**
+     * 删除数据库中的所有邮件
+     */
     public void deleteAllMessages(){
         LitePal.deleteAll(LocalMessage.class);
     }
 
+    /**
+     * 批量修改邮件中的标记，并保存或更新
+     * @param localMessages localmessage集合
+     * @param flag 需要修改的标记，通常为Flags.Flag下的标记
+     * @param set 修改标记的目标值
+     */
     public void flagMessage(List<LocalMessage> localMessages, Flags.Flag flag, boolean set){
         for(LocalMessage localMessage : localMessages){
             if(flag == Flags.Flag.DRAFT){
@@ -148,12 +179,21 @@ public class MessageLocalResource {
 
     }
 
+    /**
+     * 批量删除邮件
+     * @param localMessages 要删除的LocalMessage集合
+     */
     public void deleteMessages(List<LocalMessage> localMessages) {
         for(LocalMessage localMessage : localMessages){
             LitePal.delete(LocalMessage.class, localMessage.getId());
         }
     }
 
+    /**
+     * 批量移动邮件
+     * @param localMessages 需要移动的LocalMessage集合
+     * @param destFolder 移动到的目标文件夹
+     */
     public void moveMessages(List<LocalMessage> localMessages, LocalFolder destFolder){
         if(destFolder == null || localMessages == null){
             return;
@@ -164,6 +204,10 @@ public class MessageLocalResource {
         }
     }
 
+    /**
+     * 填充邮件的各个联系人，一般在从数据库取出邮件时调用
+     * @param localMessage 需要填充的邮件
+     */
     private void fillMessageContacts(LocalMessage localMessage){
         List<MessageContact> messageContacts = LitePal.where("localmessage_id = ?", String.valueOf(localMessage.getId()))
                 .find(MessageContact.class, true);

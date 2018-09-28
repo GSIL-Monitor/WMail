@@ -1,7 +1,5 @@
 package com.gongw.mailcore.message;
 
-import android.util.SparseArray;
-
 import com.gongw.mailcore.net.MessageFetcher;
 import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.contact.Contact;
@@ -13,12 +11,9 @@ import com.sun.mail.pop3.POP3Message;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.mail.Address;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -27,9 +22,9 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 /**
+ * 网络上的邮件资源类，提供操作网络上的LocalMessage数据的接口
  * Created by gongw on 2018/7/17.
  */
 
@@ -46,7 +41,15 @@ public class MessageNetResource extends NetResource{
         return InstanceHolder.instance;
     }
 
-
+    /**
+     * 从邮箱服务器拉取指定文件夹下，指定位置的邮件
+     * @param localFolder 指定的文件夹
+     * @param start 指定的起始位置
+     * @param end 指定的结束位置
+     * @return 符合条件的LocalMessage集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     public List<LocalMessage> fetchMessages(LocalFolder localFolder, int start, int end) throws MessagingException, IOException {
         List<LocalMessage> localMessageList = new ArrayList<>();
         MessageFetcher fetcher = getFetcher(localFolder.getAccount());
@@ -65,6 +68,13 @@ public class MessageNetResource extends NetResource{
         return localMessageList;
     }
 
+    /**
+     * 批量修改邮件的标记
+     * @param localMessages 邮件集合
+     * @param flag 修改的标记
+     * @param set 标记的目标值
+     * @throws MessagingException
+     */
     public void flagMessages(List<LocalMessage> localMessages, Flags.Flag flag, boolean set) throws MessagingException {
         if(localMessages == null || flag == null){
             return;
@@ -83,6 +93,11 @@ public class MessageNetResource extends NetResource{
 
     }
 
+    /**
+     *  删除指定邮件
+     * @param localMessages 指定的邮件集合
+     * @throws MessagingException
+     */
     public void deleteMessages(List<LocalMessage> localMessages) throws MessagingException {
         if(localMessages == null){
             return;
@@ -101,6 +116,12 @@ public class MessageNetResource extends NetResource{
         }
     }
 
+    /**
+     * 移动邮件到指定文件夹
+     * @param localMessages 邮件集合
+     * @param destFolder 目标文件夹
+     * @throws MessagingException
+     */
     public void moveMessages(List<LocalMessage> localMessages, LocalFolder destFolder) throws MessagingException {
         if(localMessages == null || destFolder == null){
             return;
@@ -119,6 +140,12 @@ public class MessageNetResource extends NetResource{
         }
     }
 
+    /**
+     * 添加邮件到指定文件夹
+     * @param destFolder 指定文件夹
+     * @param messages 邮件
+     * @throws MessagingException
+     */
     public void appendMessages(LocalFolder destFolder, Message... messages) throws MessagingException {
         if(destFolder == null || messages == null){
             return;
@@ -129,6 +156,8 @@ public class MessageNetResource extends NetResource{
 
     /**
      * 按Folder Url划分,用于不同账号不同文件夹的邮件分类
+     * @param localMessages LocalMessage集合
+     * @return 划分好的Message Map, key为文件夹的url，value为对应的邮件集合
      */
     private Map<String, List<LocalMessage>> classifyMessagesByFolderUrl(List<LocalMessage> localMessages){
         Map<String, List<LocalMessage>> messageMap = new HashMap<>();
@@ -143,6 +172,15 @@ public class MessageNetResource extends NetResource{
         return messageMap;
     }
 
+    /**
+     * 将从网络获取的Message对象转换为LocalMessage对象
+     * @param localFolder 邮件所在文件夹
+     * @param message 从网络获取的Message邮件
+     * @param folder 邮件所在的文件夹
+     * @return LocalMessage对象
+     * @throws MessagingException
+     * @throws IOException
+     */
     private LocalMessage convertLocalMessage(LocalFolder localFolder, Message message, Folder folder) throws MessagingException, IOException {
         LocalMessage localMessage = new LocalMessage();
         localMessage.setFolder(localFolder);
@@ -254,6 +292,11 @@ public class MessageNetResource extends NetResource{
         return localMessage;
     }
 
+    /**
+     * 将Address对象转换为Contact对象
+     * @param address 需要转换的Address对象
+     * @return Contact对象
+     */
     private Contact convertContact(Address address){
         InternetAddress internetAddress = (InternetAddress)address;
         String email = internetAddress.getAddress();
@@ -264,6 +307,13 @@ public class MessageNetResource extends NetResource{
         return contact;
     }
 
+    /**
+     * 用Contact和LocalMessage生成MessageContact对象
+     * @param localMessage LocalMessage对象
+     * @param contact Contact对象
+     * @param type Contact对象在LocalMessage对象中的类型
+     * @return MessageContact对象
+     */
     private MessageContact convertMessageContact(LocalMessage localMessage, Contact contact, String type){
         MessageContact messageContact = new MessageContact();
         messageContact.setLocalMessage(localMessage);

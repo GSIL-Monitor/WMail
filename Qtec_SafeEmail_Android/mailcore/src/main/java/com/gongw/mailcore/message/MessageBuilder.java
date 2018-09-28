@@ -12,6 +12,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
+ * 用于生成一封邮件MimeMessage，一般邮件的内容结构如下：
  * +-------------------------  multipart/mixed  -----------------------+
  * |                                                                   |
  * |    +--------------------  multipart/related  ---------------+     |
@@ -29,18 +30,46 @@ import javax.mail.internet.MimeMultipart;
  * +-------------------------------------------------------------------+
  * Created by gongw on 2018/9/26.
  */
-
 public class MessageBuilder {
-
+    /**
+     * 邮件主题
+     */
     private String subject;
+    /**
+     * 邮件来源人
+     */
     private Address from;
+    /**
+     * 邮件收件人
+     */
     private Address[] to;
+    /**
+     * 邮件抄送人
+     */
     private Address[] cc;
+    /**
+     * 邮件密送人
+     */
     private Address[] bcc;
+    /**
+     * 邮件回复人
+     */
     private Address[] reply;
+    /**
+     * 邮件发送人
+     */
     private Address sender;
+    /**
+     * 邮件正文
+     */
     private String content = "";
+    /**
+     * 邮件正文的内联引用
+     */
     private File[] inLines;
+    /**
+     * 邮件附件
+     */
     private File[] attachments;
 
     public MessageBuilder subject(String subject){
@@ -93,6 +122,11 @@ public class MessageBuilder {
         return this;
     }
 
+    /**
+     * 生成一封MimeMessage邮件,可通过MessageSender的sendMsg发送
+     * @return MimeMessage
+     * @throws MessagingException
+     */
     public MimeMessage build() throws MessagingException {
         MimeMessage mimeMessage = new MimeMessage(MailSession.getDefaultSession());
         //头部基本信息

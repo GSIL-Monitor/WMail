@@ -23,6 +23,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeUtility;
 
 /**
+ * 网络上的邮件part资源类，提供操作网络上的Part数据的接口
  * +-------------------------  multipart/mixed  -----------------------+
  * |                                                                   |
  * |    +--------------------  multipart/related  ---------------+     |
@@ -42,9 +43,21 @@ import javax.mail.internet.MimeUtility;
  */
 
 public class PartNetResource extends NetResource {
+    /**
+     * 用于保存part数据的文件夹
+     */
     private File defaultDir;
+    /**
+     * 用于保存正文类型part数据的文件夹
+     */
     private File contentDir;
+    /**
+     * 用于保存附件类型part数据的文件夹
+     */
     private File attachmentDir;
+    /**
+     * 用于保存正文内联引用类型part数据的文件夹
+     */
     private File inlineDir;
 
     private static class InstanceHolder{
@@ -74,6 +87,14 @@ public class PartNetResource extends NetResource {
         return InstanceHolder.instance;
     }
 
+    /**
+     * 获取指定邮件下的所有part，不包含multipart/*类型的
+     * @param localMessage 指定的邮件
+     * @param saveToLocal 是否将part内容保存到本地
+     * @return LocalPart集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     public List<LocalPart> getAllParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
@@ -82,6 +103,14 @@ public class PartNetResource extends NetResource {
         return localParts;
     }
 
+    /**
+     * 获取指定邮件的正文part
+     * @param localMessage 指定的邮件
+     * @param saveToLocal 是否将part内容保存到本地
+     * @return LocalPart集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     public List<LocalPart> getContentParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
@@ -93,6 +122,14 @@ public class PartNetResource extends NetResource {
         return localParts;
     }
 
+    /**
+     * 获取指定邮件的正文内联引用part
+     * @param localMessage 指定的邮件
+     * @param saveToLocal 是否将part内容保存到本地
+     * @return LocalPart集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     public List<LocalPart> getInlineParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
@@ -104,6 +141,14 @@ public class PartNetResource extends NetResource {
         return localParts;
     }
 
+    /**
+     * 获取指定邮件的附件part
+     * @param localMessage 指定的邮件
+     * @param saveToLocal 是否将part内容保存到本地
+     * @return LocalPart集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     public LocalPart getAttachmentPartByIndex(LocalMessage localMessage, int index, boolean saveToLocal) throws MessagingException, IOException {
         MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
         List<LocalPart> localParts = new ArrayList<>();
@@ -113,6 +158,13 @@ public class PartNetResource extends NetResource {
         return localParts.get(0);
     }
 
+    /**
+     * 从part中过滤出正文类型的part
+     * @param part 指定part
+     * @return Part集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     private List<Part> filterContentPart(Part part) throws MessagingException, IOException {
         if(part.isMimeType("multipart/mixed")){
             Multipart multiPart = (Multipart) part.getContent();
@@ -136,6 +188,13 @@ public class PartNetResource extends NetResource {
         return contentParts;
     }
 
+    /**
+     * 从part中过滤出正文引用类型的part
+     * @param part 指定part
+     * @return Part集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     private List<Part> filterInlineParts(Part part) throws MessagingException, IOException {
         if(part.isMimeType("multipart/mixed")){
             Multipart multiPart = (Multipart) part.getContent();
@@ -156,6 +215,13 @@ public class PartNetResource extends NetResource {
         return inLineParts;
     }
 
+    /**
+     * 从part中过滤出附件类型的part
+     * @param part 指定part
+     * @return Part集合
+     * @throws MessagingException
+     * @throws IOException
+     */
     private List<Part> filterAttachmentParts(Part part) throws MessagingException, IOException {
         List<Part> attachmentParts = new ArrayList<>();
         if(part.isMimeType("multipart/mixed")){
@@ -172,6 +238,15 @@ public class PartNetResource extends NetResource {
         return attachmentParts;
     }
 
+    /**
+     * 解析除multipart/*类型外的part，并将part内容保存到本地
+     * @param localMessage 指定邮件
+     * @param part 起始part
+     * @param partList 解析后的part转为LocalPart，并添加到该集合中
+     * @param saveToLocal 决定是否将part内容保存到本地
+     * @throws IOException
+     * @throws MessagingException
+     */
     private void parseMsgPart(LocalMessage localMessage, Part part, List<LocalPart> partList, boolean saveToLocal) throws IOException, MessagingException {
         if(part.isMimeType("multipart/*")){
             Multipart multiPart = (Multipart) part.getContent();
@@ -189,6 +264,13 @@ public class PartNetResource extends NetResource {
         }
     }
 
+    /**
+     * 将part转换为LocalPart
+     * @param part 需要转换的part
+     * @param localMessage part所属的邮件
+     * @return LocalPart
+     * @throws MessagingException
+     */
     private LocalPart convertLocalPart(Part part, LocalMessage localMessage) throws MessagingException {
         LocalPart localPart = new LocalPart();
         localPart.setDataLocation(LocalPart.Location.LOCATION_MISSING);
@@ -226,6 +308,13 @@ public class PartNetResource extends NetResource {
         return localPart;
     }
 
+    /**
+     * 将part内容保存到文件
+     * @param part 需要保存的part
+     * @param localPart 与part对应的LocalPart
+     * @throws MessagingException
+     * @throws UnsupportedEncodingException
+     */
     private void savePartToFile(Part part, LocalPart localPart) throws MessagingException, UnsupportedEncodingException {
         File dir = defaultDir;
         switch (localPart.getType()){

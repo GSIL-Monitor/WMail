@@ -11,9 +11,9 @@ import javax.mail.Store;
 import javax.mail.URLName;
 
 /**
+ * 用于从邮箱服务器获取信息的类
  * Created by gongw on 2018/8/30.
  */
-
 public class MessageFetcher {
     private Store store;
 
@@ -26,7 +26,7 @@ public class MessageFetcher {
     }
 
     /**
-     * 设置URLName
+     * 设置imap或pop服务url，并尝试连接
      * @param storeUrl 用于保存protocol,host,port,username,password等信息
      * @throws NoSuchProviderException
      */

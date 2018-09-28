@@ -1,9 +1,7 @@
 package com.gongw.mailcore.message;
 
-import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.folder.LocalFolder;
 import com.gongw.mailcore.part.LocalPart;
-
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 import java.util.Date;
@@ -16,32 +14,54 @@ import java.util.List;
 public class LocalMessage extends LitePalSupport {
 
     private long id;
-
+    /**
+     * 该邮件属于的文件夹
+     */
     @Column(nullable = false)
     private LocalFolder folder;
-
+    /**
+     * 该邮件是否已经被清除了
+     */
     private boolean expunged;
-
+    /**
+     * 邮件接收日期
+     */
     private Date receiveDate;
-
+    /**
+     * 邮件发送日期
+     */
     private Date sentDate;
-
+    /**
+     * 邮件主题
+     */
     private String subject;
-
-    private int flags;
-
+    /**
+     * 邮件的收件人集合
+     */
     private List<MessageContact> recipientsTo;
-
+    /**
+     * 邮件的抄送人集合
+     */
     private List<MessageContact> recipientsCc;
-
+    /**
+     * 邮件的密送人集合
+     */
     private List<MessageContact> recipientsBcc;
-
+    /**
+     * 邮件的来源人
+     */
     private List<MessageContact> from;
-
+    /**
+     * 邮件的回复人
+     */
     private List<MessageContact> replyTo;
-
+    /**
+     * 邮件的发送人
+     */
     private MessageContact sender;
-
+    /**
+     * 邮件的messageId
+     */
     @Column(unique = true)
     private String messageId;
 
@@ -79,13 +99,21 @@ public class LocalMessage extends LitePalSupport {
      * 系统是否支持用户自定义标记，只能检索，不能设置这个属性
      */
     private boolean user;
-
+    /**
+     * 邮件的part集合，不包含multipart/*类型
+     */
     private List<LocalPart> partList;
-
+    /**
+     * 邮件的附件数
+     */
     private int attachmentCount;
-
+    /**
+     * 邮件的uid，在文件夹中是唯一的
+     */
     private long uid;
-
+    /**
+     * 邮件大小
+     */
     private long size;
 
     public long getId() {
@@ -134,14 +162,6 @@ public class LocalMessage extends LitePalSupport {
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public int getFlags() {
-        return flags;
-    }
-
-    public void setFlags(int flags) {
-        this.flags = flags;
     }
 
     public MessageContact getSender() {

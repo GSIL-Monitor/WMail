@@ -9,18 +9,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 
 /**
+ * 邮件业务模型，提供对LocalMessage数据的操作接口
  * Created by gongw on 2018/7/17.
  */
-
 public class MessageModel {
-
+    /**
+     * 邮件本地数据库资源对象，提供操作本地邮件资源的接口
+     */
     private MessageLocalResource localResource;
+    /**
+     * 邮件网络资源对象，提供操作邮件服务器上的邮件资源的接口
+     */
     private MessageNetResource netResource;
+    /**
+     * 分页获取邮件时，每页的邮件数量
+     */
     private int pageSize = 20;
 
     private MessageModel(){
@@ -36,7 +43,17 @@ public class MessageModel {
         return InstanceHolder.instance;
     }
 
-    public List<LocalMessage> getMessages(LocalFolder localFolder, int pageIndex) throws MessagingException, IOException {
+    /**
+     * 按页获取指定文件夹下的邮件
+     * 先从本地数据库获取，如果获取到则直接返回
+     * 如果本地未获取到，则从网络获取，并将获取到的邮件保存到本地
+     * @param localFolder 指定的文件夹LocalFolder
+     * @param pageIndex 需要获取的页序号
+     * @return LocalMessage集合
+     * @throws MessagingException
+     * @throws IOException
+     */
+    public List<LocalMessage> getMessagesByPage(LocalFolder localFolder, int pageIndex) throws MessagingException, IOException {
         List<LocalMessage> messageList = localResource.getMessagesByFolderId(localFolder.getId(), pageSize, pageIndex * pageSize);
         if(messageList.size() < 1){
             refreshMessages(localFolder, pageIndex);
@@ -49,6 +66,13 @@ public class MessageModel {
         return messageList;
     }
 
+    /**
+     * 按页获取从网络获取指定文件夹下的邮件，并将获取到的邮件保存到本地
+     * @param localFolder 指定的文件夹
+     * @param pageIndex 指定的页序号
+     * @throws MessagingException
+     * @throws IOException
+     */
     public void refreshMessages(LocalFolder localFolder, int pageIndex) throws MessagingException, IOException {
         FolderModel.singleInstance().refreshFolders(localFolder.getAccount());
         List<LocalFolder> localFolders = FolderModel.singleInstance().getFolders(localFolder.getAccount());
@@ -70,11 +94,26 @@ public class MessageModel {
         localResource.saveOrUpdateMessages(localMessages);
     }
 
+    /**
+     * 批量修改邮件标记
+     * @param localMessages 需要修改的
+     * @param flag 需要修改的flag，一般为Flags.Flag下的
+     * @param set falg的目标值
+     * @throws MessagingException
+     */
     public void flagMessages(List<LocalMessage> localMessages, Flags.Flag flag, boolean set) throws MessagingException {
         netResource.flagMessages(localMessages, flag, set);
         localResource.flagMessage(localMessages, flag, set);
     }
 
+    /**
+     * 批量删除指定邮件
+     * @param localMessages 需要删除的邮件
+     * @param eager 是否彻底删除
+     *              true：不论在哪个文件夹都执行删除操作
+     *              false：如果在已删除或垃圾邮件文件夹就执行删除操作，否则执行移动操作，将邮件从当前文件夹，移动到已删除文件夹
+     * @throws MessagingException
+     */
     public void deleteMessages(List<LocalMessage> localMessages, boolean eager) throws MessagingException {
         //如果是彻底删除，则不论在哪个文件夹都直接删除
         if(eager){
