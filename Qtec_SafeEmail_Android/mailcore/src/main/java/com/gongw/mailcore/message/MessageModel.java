@@ -4,6 +4,7 @@ import com.gongw.mailcore.account.Account;
 import com.gongw.mailcore.folder.FolderModel;
 import com.gongw.mailcore.folder.LocalFolder;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -137,14 +138,32 @@ public class MessageModel {
                 //如果不是已删除，垃圾箱的邮件则将邮件移动到已删除文件夹
                 if(!LocalFolder.Type.DELETED.equals(localFolderType) && !LocalFolder.Type.TRASH.equals(localFolderType) && !LocalFolder.Type.JUNK.equals(localFolderType)){
                     LocalFolder destFolder = FolderModel.singleInstance().getTrashOrDeletedFolder(account);
-                    netResource.moveMessages(messages, destFolder);
-                    localResource.moveMessages(messages, destFolder);
+                    moveMessages(messages, destFolder);
                 }else{
-                    netResource.deleteMessages(messages);
-                    localResource.deleteMessages(messages);
+                    deleteMessages(messages, true);
                 }
             }
         }
+    }
+
+    /**
+     * 批量移动邮件到指定文件夹
+     * @param localMessages 邮件集合
+     * @param destFolder 目标文件夹
+     */
+    public void moveMessages(List<LocalMessage> localMessages, LocalFolder destFolder) throws MessagingException {
+        netResource.moveMessages(localMessages, destFolder);
+        localResource.moveMessages(localMessages, destFolder);
+    }
+
+    /**
+     * 添加邮件到指定文件夹
+     * @param destFolder 目标文件夹
+     * @param message 需要添加的邮件
+     */
+    public void appendMessages(LocalFolder destFolder, LocalMessage message) throws MessagingException, UnsupportedEncodingException {
+        netResource.appendMessage(destFolder, new MessageBuilder().build(message));
+        localResource.appendMessage(destFolder, message);
     }
 
 }

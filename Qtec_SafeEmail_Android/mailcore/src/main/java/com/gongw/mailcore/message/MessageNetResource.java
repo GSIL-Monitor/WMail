@@ -146,7 +146,7 @@ public class MessageNetResource extends NetResource{
      * @param messages 邮件
      * @throws MessagingException
      */
-    public void appendMessages(LocalFolder destFolder, Message... messages) throws MessagingException {
+    public void appendMessage(LocalFolder destFolder, Message... messages) throws MessagingException {
         if(destFolder == null || messages == null){
             return;
         }

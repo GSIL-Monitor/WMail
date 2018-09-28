@@ -5,7 +5,11 @@ import com.gongw.mailcore.message.MessageContact;
 
 import org.litepal.crud.LitePalSupport;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+
+import javax.mail.Address;
+import javax.mail.internet.InternetAddress;
 
 /**
  * 联系人类，包含邮箱和名称，一般从邮件中的收件人、发件人、抄送人等域自动生成
@@ -59,5 +63,9 @@ public class Contact extends LitePalSupport {
 
     public void setMessageContacts(List<MessageContact> messageContacts) {
         this.messageContacts = messageContacts;
+    }
+
+    public Address toAddress() throws UnsupportedEncodingException {
+        return new InternetAddress(email, personalName);
     }
 }

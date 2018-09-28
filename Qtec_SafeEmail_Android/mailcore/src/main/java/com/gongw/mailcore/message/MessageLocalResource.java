@@ -205,6 +205,16 @@ public class MessageLocalResource {
     }
 
     /**
+     * 将邮件添加到指定文件夹
+     * @param destFolder 目标文件夹
+     * @param message 邮件
+     */
+    public void appendMessage(LocalFolder destFolder, LocalMessage message) {
+        message.setFolder(destFolder);
+        saveOrUpdateMessage(message);
+    }
+
+    /**
      * 填充邮件的各个联系人，一般在从数据库取出邮件时调用
      * @param localMessage 需要填充的邮件
      */

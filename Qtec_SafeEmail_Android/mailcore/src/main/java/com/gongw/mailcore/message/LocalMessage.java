@@ -100,9 +100,21 @@ public class LocalMessage extends LitePalSupport {
      */
     private boolean user;
     /**
-     * 邮件的part集合，不包含multipart/*类型
+     * 附件类型的part集合
      */
-    private List<LocalPart> partList;
+    private List<LocalPart> attachmentParts;
+    /**
+     * 正文引用类型的part集合
+     */
+    private List<LocalPart> inLineParts;
+    /**
+     * html正文类型的part
+     */
+    private LocalPart htmlContentPart;
+    /**
+     * text正文类型的part
+     */
+    private LocalPart textContentPart;
     /**
      * 邮件的附件数
      */
@@ -178,14 +190,6 @@ public class LocalMessage extends LitePalSupport {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
-    }
-
-    public List<LocalPart> getPartList() {
-        return partList;
-    }
-
-    public void setPartList(List<LocalPart> partList) {
-        this.partList = partList;
     }
 
     public int getAttachmentCount() {
@@ -268,30 +272,6 @@ public class LocalMessage extends LitePalSupport {
         this.user = user;
     }
 
-    public LocalPart getHtmlContentPart() {
-        if(partList == null){
-            return null;
-        }
-        for(LocalPart part : partList){
-            if(LocalPart.Type.HTML_CONTENT.equals(part.getType())){
-                return part;
-            }
-        }
-        return null;
-    }
-
-    public LocalPart getTextContentPart() {
-        if(partList == null){
-            return null;
-        }
-        for(LocalPart part : partList){
-            if(LocalPart.Type.TEXT_CONTENT.equals(part.getType())){
-                return part;
-            }
-        }
-        return null;
-    }
-
     public List<MessageContact> getRecipientsTo() {
         return recipientsTo;
     }
@@ -330,5 +310,37 @@ public class LocalMessage extends LitePalSupport {
 
     public void setReplyTo(List<MessageContact> replyTo) {
         this.replyTo = replyTo;
+    }
+
+    public List<LocalPart> getAttachmentParts() {
+        return attachmentParts;
+    }
+
+    public void setAttachmentParts(List<LocalPart> attachmentParts) {
+        this.attachmentParts = attachmentParts;
+    }
+
+    public List<LocalPart> getInLineParts() {
+        return inLineParts;
+    }
+
+    public void setInLineParts(List<LocalPart> inLineParts) {
+        this.inLineParts = inLineParts;
+    }
+
+    public LocalPart getHtmlContentPart() {
+        return htmlContentPart;
+    }
+
+    public void setHtmlContentPart(LocalPart htmlContentPart) {
+        this.htmlContentPart = htmlContentPart;
+    }
+
+    public LocalPart getTextContentPart() {
+        return textContentPart;
+    }
+
+    public void setTextContentPart(LocalPart textContentPart) {
+        this.textContentPart = textContentPart;
     }
 }
