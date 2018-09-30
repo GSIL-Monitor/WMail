@@ -2,6 +2,7 @@ package com.gongw.mailcore.part;
 
 import com.gongw.mailcore.message.LocalMessage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.mail.MessagingException;
 
@@ -50,8 +51,27 @@ public class PartModel {
         }
         for(LocalPart localPart : partList){
             localPart.setLocalMessage(localMessage);
+            if(LocalPart.Type.HTML_CONTENT.equals(localPart.getType())){
+                localMessage.setHtmlContentPart(localPart);
+            }
+            else if(LocalPart.Type.TEXT_CONTENT.equals(localPart.getType())){
+                localMessage.setTextContentPart(localPart);
+            }
+            else if(LocalPart.Type.INLINE.equals(localPart.getType())){
+                List<LocalPart> inLineParts = localMessage.getInLineParts();
+                if(inLineParts == null){
+                    inLineParts = new ArrayList<>();
+                }
+                inLineParts.add(localPart);
+            }
+            else if(LocalPart.Type.ATTACHMENT.equals(localPart.getType())){
+                List<LocalPart> attachParts = localMessage.getAttachmentParts();
+                if(attachParts == null){
+                    attachParts = new ArrayList<>();
+                }
+                attachParts.add(localPart);
+            }
         }
-        localMessage.setPartList(partList);
         return partList;
     }
 

@@ -3,7 +3,11 @@ package com.gongw.mailcore.message;
 import com.gongw.mailcore.net.MailSession;
 import com.gongw.mailcore.part.LocalPart;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
@@ -78,7 +82,7 @@ public class MessageBuilder {
     /**
      * 邮件正文
      */
-    private File content;
+    private String content;
     /**
      * 邮件正文的内联引用
      */
@@ -228,10 +232,7 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder content(File content){
-        if(content == null || !content.exists() || content.isDirectory()){
-            return this;
-        }
+    public MessageBuilder content(String content){
         this.content = content;
         return this;
     }
@@ -240,8 +241,39 @@ public class MessageBuilder {
         if(part == null){
             return this;
         }
-        File file = new File(part.getLocalPath());
-        return content(file);
+        FileInputStream fis = null;
+        ByteArrayOutputStream bos = null;
+        String content = "";
+        try {
+            fis = new FileInputStream(part.getLocalPath());
+            bos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while((length = fis.read(buffer)) != -1){
+                bos.write(buffer, 0, length);
+            }
+            content = bos.toString(part.getCharset());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(fis != null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(bos != null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return content(content);
     }
 
     public MessageBuilder inLine(File[] inLines){

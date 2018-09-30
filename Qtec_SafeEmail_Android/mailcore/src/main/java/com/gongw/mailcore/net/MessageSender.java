@@ -18,6 +18,10 @@ public class MessageSender {
         setTransportUrl(transportUrl);
     }
 
+    public String getTransportUrl(){
+        return transport.getURLName().toString();
+    }
+
     /**
      * 这是smtp连接url，并尝试连接
      * @param transportUrl 用于连接smtp服务的url

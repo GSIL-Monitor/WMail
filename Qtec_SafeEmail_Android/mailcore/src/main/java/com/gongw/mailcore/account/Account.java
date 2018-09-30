@@ -1,7 +1,9 @@
 package com.gongw.mailcore.account;
 
 
+
 import com.gongw.mailcore.folder.LocalFolder;
+
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.List;
  * Created by gongw on 2018/8/30.
  */
 
-public class Account extends LitePalSupport{
+public class Account extends LitePalSupport {
 
     private long id;
     /**
@@ -42,6 +44,18 @@ public class Account extends LitePalSupport{
      * 邮箱下包含的文件夹集合
      */
     private List<LocalFolder> folderList;
+    /**
+     * 是否是加密账号
+     */
+    private boolean isEncryptAccount;
+    /**
+     * 邮件签名
+     */
+    private String signature;
+    /**
+     * 检查邮件更新的频率
+     */
+    private int checkFrequency;
 
     public long getId() {
         return id;
@@ -97,5 +111,29 @@ public class Account extends LitePalSupport{
 
     public void setFolderList(List<LocalFolder> folderList) {
         this.folderList = folderList;
+    }
+
+    public boolean isEncryptAccount() {
+        return isEncryptAccount;
+    }
+
+    public void setEncryptAccount(boolean encryptAccount) {
+        isEncryptAccount = encryptAccount;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public int getCheckFrequency() {
+        return checkFrequency;
+    }
+
+    public void setCheckFrequency(int checkFrequency) {
+        this.checkFrequency = checkFrequency;
     }
 }

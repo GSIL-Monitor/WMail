@@ -166,4 +166,13 @@ public class MessageModel {
         localResource.appendMessage(destFolder, message);
     }
 
+    /**
+     * 发送邮件
+     * @param localMessage 邮件
+     * @throws UnsupportedEncodingException
+     * @throws MessagingException
+     */
+    public void sendMessage(LocalMessage localMessage) throws UnsupportedEncodingException, MessagingException {
+        netResource.sendMessage(localMessage);
+    }
 }

@@ -12,16 +12,23 @@ import android.util.Log;
 
 import com.gongw.mailcore.account.Account;
 import com.gongw.mailcore.account.AccountModel;
+import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.folder.FolderModel;
 import com.gongw.mailcore.folder.LocalFolder;
 import com.gongw.mailcore.message.LocalMessage;
+import com.gongw.mailcore.message.MessageBuilder;
+import com.gongw.mailcore.message.MessageContact;
 import com.gongw.mailcore.message.MessageModel;
+import com.gongw.mailcore.net.MessageSender;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.Address;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 
 /**
@@ -114,12 +121,21 @@ public class MessageViewListFragment extends ListFragment {
 
 
 //                    Address[] to = new Address[]{new InternetAddress("gongw@qtec.cn", "龚伟")};
-//                    MimeMessage message = new MessageBuilder().subject("测试javamail发送邮件")
+//                    MimeMessage message = new MessageBuilder().subject()
 //                                                                .to(to)
 //                                                                .content("测试邮件Text正文")
 //                                                                .sender(to[0])
 //                                                                .build();
-//                    new MessageSender(account.getTransportUrl()).sendMsg(message);
+//                    LocalMessage localMessage = new LocalMessage();
+//                    localMessage.setSubject("测试javamail发送邮件");
+//                    localMessage.setSubject("测试邮件Text正文");
+//                    MessageContact messageContact = new MessageContact();
+//                    messageContact.setLocalMessage(localMessage);
+//                    messageContact.setContact(new Contact("gongw@qtec.cn", "gongw"));
+//                    List<MessageContact> tos = new ArrayList<>();
+//                    tos.add(messageContact);
+//                    localMessage.setRecipientsTo(tos);
+//                    MessageModel.singleInstance().sendMessage(localMessage);
 
                 } catch (MessagingException e) {
                     e.printStackTrace();

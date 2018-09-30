@@ -2,12 +2,9 @@ package com.gongw.mailcore.contact;
 
 
 import com.gongw.mailcore.message.MessageContact;
-
 import org.litepal.crud.LitePalSupport;
-
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-
 import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
 
@@ -32,6 +29,13 @@ public class Contact extends LitePalSupport {
      * 主要用于LitePal创建关联表，此项一般不设置，为空
      */
     private List<MessageContact> messageContacts;
+
+    public Contact(){}
+
+    public Contact(String email, String personalName){
+        this.email = email;
+        this.personalName = personalName;
+    }
 
     public long getId() {
         return id;

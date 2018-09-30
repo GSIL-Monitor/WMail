@@ -1,8 +1,8 @@
 package com.gongw.mailcore.account;
 
-import org.litepal.LitePal;
-
 import java.util.List;
+
+import javax.mail.MessagingException;
 
 /**
  * Account业务模型，提供对Account数据的获取、保存、修改、删除等操作接口
@@ -10,6 +10,14 @@ import java.util.List;
  */
 
 public class AccountModel {
+    /**
+     * 邮箱账号数据库资源对象，提供操作本地邮箱账号资源的接口
+     */
+    private AccountLocalResource localAccountResource;
+    /**
+     * 邮箱账号网络资源对象，提供邮箱账号的网络操作接口
+     */
+    private AccountNetResource netAccountResource;
 
     private static class InstanceHolder{
         private static AccountModel instance = new AccountModel();
@@ -19,14 +27,27 @@ public class AccountModel {
         return InstanceHolder.instance;
     }
 
-    private AccountModel(){}
+
+    private AccountModel(){
+        localAccountResource = AccountLocalResource.singleInstance();
+        netAccountResource = AccountNetResource.singleInstance();
+    }
+
+    /**
+     * 连接邮箱服务器
+     * @param account 邮箱账号
+     * @throws MessagingException
+     */
+    public void connect(Account account) throws MessagingException {
+        netAccountResource.connect(account);
+    }
 
     /**
      * 获取所有数据库中存储的Account信息
      * @return 从数据库中取出的Account集合
      */
     public List<Account> getAllAccounts(){
-        return LitePal.findAll(Account.class);
+        return localAccountResource.getAllAccounts();
     }
 
     /**
@@ -34,8 +55,16 @@ public class AccountModel {
      * @param id 要查询的Accoutn的id
      * @return 查询到的Account
      */
-    public Account getAccountsById(int id){
-        return LitePal.find(Account.class, id);
+    public Account getAccountById(int id){
+        return localAccountResource.getAccountById(id);
+    }
+
+    /**
+     * 保存或更新Account到数据库，如果email已经存在则为更新操作，否则为保存操作
+     * @param account 要保存或更新的Account
+     */
+    public void saveOrUpdateAccount(Account account){
+        localAccountResource.saveOrUpdateAccount(account);
     }
 
     /**
@@ -44,8 +73,7 @@ public class AccountModel {
      * @return 查询到的Account集合
      */
     public List<Account> getAccountsByEmail(String email){
-        return LitePal.where("email = ?", email)
-                .find(Account.class);
+        return localAccountResource.getAccountsByEmail(email);
     }
 
     /**
@@ -53,24 +81,7 @@ public class AccountModel {
      * @param accounts 需要保存或更新的Account集合
      */
     public void saveOrUpdateAccounts(List<Account> accounts){
-        for(Account account : accounts){
-            //TODO:密码存储时需要加密
-            saveOrUpdateAccount(account);
-        }
-    }
-
-    /**
-     * 保存或更新Account到数据库，如果email已经存在则为更新操作，否则为保存操作
-     * @param account 要保存或更新的Account
-     */
-    public void saveOrUpdateAccount(Account account){
-        List<Account> accounts = LitePal.where("email = ?", account.getEmail())
-                                        .find(Account.class);
-        if(accounts.size() < 1){
-            account.save();
-        }else{
-            account.update(accounts.get(0).getId());
-        }
+        localAccountResource.saveOrUpdateAccounts(accounts);
     }
 
     /**
@@ -78,7 +89,7 @@ public class AccountModel {
      * @param id 要删除的Account的id
      */
     public void deleteById(int id){
-        LitePal.delete(Account.class, id);
+        localAccountResource.deleteById(id);
     }
 
     /**
@@ -86,13 +97,13 @@ public class AccountModel {
      * @param email 要删除的Account的email
      */
     public void deleteByEmail(String email){
-        LitePal.deleteAll(Account.class, "email = ?", email);
+        localAccountResource.deleteByEmail(email);
     }
 
     /**
      * 删除数据库中的所有Account
      */
     public void deleteAll(){
-        LitePal.deleteAll(Account.class);
+       localAccountResource.deleteAll();
     }
 }

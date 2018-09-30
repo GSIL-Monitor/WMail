@@ -1,6 +1,7 @@
 package com.gongw.mailcore.message;
 
 import com.gongw.mailcore.net.MessageFetcher;
+import com.gongw.mailcore.net.MessageSender;
 import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.folder.LocalFolder;
@@ -9,6 +10,7 @@ import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Message;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -152,6 +154,18 @@ public class MessageNetResource extends NetResource{
         }
         MessageFetcher fetcher = getFetcher(destFolder.getAccount());
         fetcher.appendMessages(destFolder.getFullName(), messages);
+    }
+
+    /**
+     * 发送邮件
+     * @param localMessage 邮件
+     * @throws MessagingException
+     * @throws UnsupportedEncodingException
+     */
+    public void sendMessage(LocalMessage localMessage) throws MessagingException, UnsupportedEncodingException {
+        MessageSender sender = getSender(localMessage.getFolder().getAccount());
+        Message message = new MessageBuilder().build(localMessage);
+        sender.sendMsg(message);
     }
 
     /**
