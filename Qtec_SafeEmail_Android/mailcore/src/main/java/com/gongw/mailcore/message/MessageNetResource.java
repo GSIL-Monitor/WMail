@@ -1,10 +1,9 @@
 package com.gongw.mailcore.message;
 
-import com.gongw.mailcore.net.MessageFetcher;
-import com.gongw.mailcore.net.MessageSender;
-import com.gongw.mailcore.net.NetResource;
+import com.gongw.mailcore.account.Account;
 import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.folder.LocalFolder;
+import com.gongw.mailcore.net.NetResource;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.pop3.POP3Folder;
@@ -22,7 +21,9 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
 import javax.mail.Multipart;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 
 /**
@@ -30,7 +31,7 @@ import javax.mail.internet.InternetAddress;
  * Created by gongw on 2018/7/17.
  */
 
-public class MessageNetResource extends NetResource{
+public class MessageNetResource extends NetResource {
 
     private static class InstanceHolder{
         private static MessageNetResource instance = new MessageNetResource();
@@ -46,20 +47,27 @@ public class MessageNetResource extends NetResource{
     /**
      * 从邮箱服务器拉取指定文件夹下，指定位置的邮件
      * @param localFolder 指定的文件夹
-     * @param start 指定的起始位置
-     * @param end 指定的结束位置
+     * @param pageIndex 指定的页序号
      * @return 符合条件的LocalMessage集合
      * @throws MessagingException
      * @throws IOException
      */
-    public List<LocalMessage> fetchMessages(LocalFolder localFolder, int start, int end) throws MessagingException, IOException {
+    public List<LocalMessage> fetchMessages(LocalFolder localFolder, int pageIndex, int pageSize) throws MessagingException, IOException {
         List<LocalMessage> localMessageList = new ArrayList<>();
-        MessageFetcher fetcher = getFetcher(localFolder.getAccount());
-        Message[] messages = fetcher.fetchMessages(localFolder.getFullName(), start, end);
+        Folder folder = openFolder(localFolder, Folder.READ_ONLY);
+        int msgCount = localFolder.getMsgCount();
+        if(msgCount == 0){
+            return localMessageList;
+        }
+        int start = msgCount - (pageIndex + 1) * pageSize + 1;
+        start = start < 1 ? 1 : start;
+        int end = start + pageSize - 1;
+        end = end < 1 ? msgCount : end;
+
+        Message[] messages = folder.getMessages(start, end);
         if(messages.length < 1){
             return localMessageList;
         }
-        Folder folder = messages[0].getFolder();
         FetchProfile fetchProfile = new FetchProfile();
         fetchProfile.add(FetchProfile.Item.ENVELOPE);
         folder.fetch(messages, fetchProfile);
@@ -82,15 +90,20 @@ public class MessageNetResource extends NetResource{
             return;
         }
         Map<String, List<LocalMessage>> messageMap = classifyMessagesByFolderUrl(localMessages);
-        for(Iterator<List<LocalMessage>> iterator = messageMap.values().iterator();iterator.hasNext();){
+        for(Iterator<List<LocalMessage>> iterator = messageMap.values().iterator(); iterator.hasNext();){
             List<LocalMessage> messages = iterator.next();
             int size = messages.size();
             long[] uids = new long[size];
             for(int i=0;i<size;i++){
                 uids[i] = messages.get(i).getUid();
             }
-            MessageFetcher fetcher = getFetcher(messages.get(0).getFolder().getAccount());
-            fetcher.flagMessages(messages.get(0).getFolder().getFullName(), uids, new Flags(flag), set);
+            LocalFolder localFolder = messages.get(0).getFolder();
+            Folder folder = openFolder(localFolder, Folder.READ_WRITE);
+            if(folder instanceof IMAPFolder){
+                IMAPFolder imapFolder = (IMAPFolder) folder;
+                Message[] msgArray = imapFolder.getMessagesByUID(uids);
+                imapFolder.setFlags(msgArray, new Flags(flag), set);
+            }
         }
 
     }
@@ -105,7 +118,7 @@ public class MessageNetResource extends NetResource{
             return;
         }
         Map<String, List<LocalMessage>> messageMap = classifyMessagesByFolderUrl(localMessages);
-        for(Iterator<List<LocalMessage>> iterator = messageMap.values().iterator();iterator.hasNext();){
+        for(Iterator<List<LocalMessage>> iterator = messageMap.values().iterator(); iterator.hasNext();){
             List<LocalMessage> messages = iterator.next();
             int size = messages.size();
             long[] uids = new long[size];
@@ -113,8 +126,13 @@ public class MessageNetResource extends NetResource{
                 uids[i] = messages.get(i).getUid();
             }
             LocalFolder localFolder = messages.get(0).getFolder();
-            MessageFetcher fetcher = getFetcher(localFolder.getAccount());
-            fetcher.deleteMessages(localFolder.getFullName(), uids);
+            Folder folder = openFolder(localFolder, Folder.READ_WRITE);
+            if(folder instanceof IMAPFolder){
+                IMAPFolder imapFolder = (IMAPFolder) folder;
+                Message[] msgArray = imapFolder.getMessagesByUID(uids);
+                imapFolder.setFlags(msgArray,  new Flags(Flags.Flag.DELETED), true);
+            }
+            folder.expunge();
         }
     }
 
@@ -129,7 +147,7 @@ public class MessageNetResource extends NetResource{
             return;
         }
         Map<String, List<LocalMessage>> messageMap = classifyMessagesByFolderUrl(localMessages);
-        for(Iterator<List<LocalMessage>> iterator = messageMap.values().iterator();iterator.hasNext();){
+        for(Iterator<List<LocalMessage>> iterator = messageMap.values().iterator(); iterator.hasNext();){
             List<LocalMessage> messages = iterator.next();
             int size = messages.size();
             long[] uids = new long[size];
@@ -137,8 +155,15 @@ public class MessageNetResource extends NetResource{
                 uids[i] = messages.get(i).getUid();
             }
             LocalFolder localFolder = messages.get(0).getFolder();
-            MessageFetcher fetcher = getFetcher(localFolder.getAccount());
-            fetcher.moveMessages(localFolder.getFullName(), uids, destFolder.getFullName());
+            Folder folder = openFolder(localFolder, Folder.READ_WRITE);
+            Folder dest = openFolder(destFolder, Folder.READ_WRITE);
+            if(folder instanceof IMAPFolder && dest instanceof IMAPFolder){
+                IMAPFolder imapFolder = (IMAPFolder) folder;
+                Message[] msgArray = imapFolder.getMessagesByUID(uids);
+                imapFolder.moveMessages(msgArray, dest);
+            }else{
+                throw new MethodNotSupportedException("getMessageByUID, moveMessages");
+            }
         }
     }
 
@@ -152,20 +177,24 @@ public class MessageNetResource extends NetResource{
         if(destFolder == null || messages == null){
             return;
         }
-        MessageFetcher fetcher = getFetcher(destFolder.getAccount());
-        fetcher.appendMessages(destFolder.getFullName(), messages);
+        Folder folder = openFolder(destFolder, Folder.READ_WRITE);
+        folder.appendMessages(messages);
     }
 
     /**
      * 发送邮件
-     * @param localMessage 邮件
-     * @throws MessagingException
+     * @param account 用于发送的账号
+     * @param localMessage 要发送的邮件
      * @throws UnsupportedEncodingException
+     * @throws MessagingException
      */
-    public void sendMessage(LocalMessage localMessage) throws MessagingException, UnsupportedEncodingException {
-        MessageSender sender = getSender(localMessage.getFolder().getAccount());
+    public void sendMessage(Account account, LocalMessage localMessage) throws UnsupportedEncodingException, MessagingException {
+        if(localMessage == null){
+            return;
+        }
+        Transport transport = getTransport(account);
         Message message = new MessageBuilder().build(localMessage);
-        sender.sendMsg(message);
+        transport.sendMessage(message, message.getAllRecipients());
     }
 
     /**

@@ -73,15 +73,36 @@ public class FolderModel {
      * @throws MessagingException
      */
     public LocalFolder getTrashOrDeletedFolder(Account account) throws MessagingException {
-        LocalFolder localFolder = folderLocalResource.singleInstance().getTrashOrDeletedFolder(account.getId());
+        LocalFolder localFolder = folderLocalResource.getTrashOrDeletedFolder(account.getId());
         if(localFolder == null){
             refreshFolders(account);
-            localFolder = folderLocalResource.singleInstance().getTrashOrDeletedFolder(account.getId());
+            localFolder = folderLocalResource.getTrashOrDeletedFolder(account.getId());
         }
         if(localFolder != null){
             localFolder.setAccount(account);
         }
         return localFolder;
     }
+
+    /**
+     * 获取指定Account下的收件箱文件夹
+     * 先从本地数据库获取，如果有符合条件的就直接返回
+     * 如果本地没有找到，则从网络获取，并将获取到的数据保存到本地数据库
+     * @param account
+     * @return
+     * @throws MessagingException
+     */
+    public LocalFolder getInboxFolder(Account account) throws MessagingException {
+        LocalFolder localFolder = folderLocalResource.getInboxFolder(account.getId());
+        if(localFolder == null){
+            refreshFolders(account);
+            localFolder = folderLocalResource.getInboxFolder(account.getId());
+        }
+        if(localFolder != null){
+            localFolder.setAccount(account);
+        }
+        return localFolder;
+    }
+
 
 }

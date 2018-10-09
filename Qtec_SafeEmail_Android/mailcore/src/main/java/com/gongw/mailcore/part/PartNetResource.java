@@ -2,9 +2,11 @@ package com.gongw.mailcore.part;
 
 import android.os.Environment;
 import android.text.TextUtils;
-import com.gongw.mailcore.net.MessageFetcher;
-import com.gongw.mailcore.net.NetResource;
+
 import com.gongw.mailcore.message.LocalMessage;
+import com.gongw.mailcore.net.NetResource;
+import com.sun.mail.imap.IMAPFolder;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -15,8 +17,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.BodyPart;
+import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
@@ -65,7 +69,7 @@ public class PartNetResource extends NetResource {
     }
 
     private PartNetResource(){
-        defaultDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/mailcore");
+        defaultDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+ "/mailcore");
         if(!defaultDir.exists()){
             defaultDir.mkdirs();
         }
@@ -96,11 +100,15 @@ public class PartNetResource extends NetResource {
      * @throws IOException
      */
     public List<LocalPart> getAllParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
-        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
-        List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
-        parseMsgPart(localMessage, message, localParts, saveToLocal);
-        return localParts;
+        Folder folder = openFolder(localMessage.getFolder(), Folder.READ_ONLY);
+        if(folder instanceof IMAPFolder){
+            IMAPFolder imapFolder = (IMAPFolder) folder;
+            Message message = imapFolder.getMessageByUID(localMessage.getUid());
+            List<LocalPart> localParts = new ArrayList<>();
+            parseMsgPart(localMessage, message, localParts, saveToLocal);
+            return localParts;
+        }
+        throw new MethodNotSupportedException("getMessageByUID");
     }
 
     /**
@@ -112,14 +120,18 @@ public class PartNetResource extends NetResource {
      * @throws IOException
      */
     public List<LocalPart> getContentParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
-        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
-        List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
-        List<Part> contentParts = filterContentPart(message);
-        for(Part part : contentParts){
-            parseMsgPart(localMessage, part, localParts, saveToLocal);
+        Folder folder = openFolder(localMessage.getFolder(), Folder.READ_ONLY);
+        if(folder instanceof IMAPFolder){
+            IMAPFolder imapFolder = (IMAPFolder) folder;
+            Message message = imapFolder.getMessageByUID(localMessage.getUid());
+            List<LocalPart> localParts = new ArrayList<>();
+            List<Part> contentParts = filterContentPart(message);
+            for(Part part : contentParts){
+                parseMsgPart(localMessage, part, localParts, saveToLocal);
+            }
+            return localParts;
         }
-        return localParts;
+        throw new MethodNotSupportedException("getMessageByUID");
     }
 
     /**
@@ -131,14 +143,18 @@ public class PartNetResource extends NetResource {
      * @throws IOException
      */
     public List<LocalPart> getInlineParts(LocalMessage localMessage, boolean saveToLocal) throws MessagingException, IOException {
-        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
-        List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
-        List<Part> inlineParts = filterInlineParts(message);
-        for(Part part : inlineParts){
-            parseMsgPart(localMessage, part, localParts, saveToLocal);
+        Folder folder = openFolder(localMessage.getFolder(), Folder.READ_ONLY);
+        if(folder instanceof IMAPFolder){
+            IMAPFolder imapFolder = (IMAPFolder) folder;
+            Message message = imapFolder.getMessageByUID(localMessage.getUid());
+            List<LocalPart> localParts = new ArrayList<>();
+            List<Part> inlineParts = filterInlineParts(message);
+            for(Part part : inlineParts){
+                parseMsgPart(localMessage, part, localParts, saveToLocal);
+            }
+            return localParts;
         }
-        return localParts;
+        throw new MethodNotSupportedException("getMessageByUID");
     }
 
     /**
@@ -150,12 +166,16 @@ public class PartNetResource extends NetResource {
      * @throws IOException
      */
     public LocalPart getAttachmentPartByIndex(LocalMessage localMessage, int index, boolean saveToLocal) throws MessagingException, IOException {
-        MessageFetcher fetcher = getFetcher(localMessage.getFolder().getAccount());
-        List<LocalPart> localParts = new ArrayList<>();
-        Message message = fetcher.fetchMessage(localMessage.getFolder().getFullName(), localMessage.getUid());
-        List<Part> attachmentParts = filterAttachmentParts(message);
-        parseMsgPart(localMessage, attachmentParts.get(index), localParts, saveToLocal);
-        return localParts.get(0);
+        Folder folder = openFolder(localMessage.getFolder(), Folder.READ_ONLY);
+        if(folder instanceof IMAPFolder){
+            IMAPFolder imapFolder = (IMAPFolder) folder;
+            Message message = imapFolder.getMessageByUID(localMessage.getUid());
+            List<LocalPart> localParts = new ArrayList<>();
+            List<Part> attachmentParts = filterAttachmentParts(message);
+            parseMsgPart(localMessage, attachmentParts.get(index), localParts, saveToLocal);
+            return localParts.get(0);
+        }
+        throw new MethodNotSupportedException("getMessageByUID");
     }
 
     /**

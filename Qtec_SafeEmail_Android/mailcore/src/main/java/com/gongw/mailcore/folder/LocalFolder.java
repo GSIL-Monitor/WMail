@@ -44,6 +44,18 @@ public class LocalFolder extends LitePalSupport {
          * 表示该文件夹为垃圾邮件
          */
         public static final String JUNK = "junk";
+        /**
+         * 表示该文件夹为加密邮件
+         */
+        public static final String ENCRYPT = "encrypt";
+        /**
+         * 表示该文件夹为加星邮件
+         */
+        public static final String STAR = "star";
+        /**
+         * 表示该文件夹为其它邮件
+         */
+        public static final String OTHERS = "others";
     }
 
     private long id;
@@ -62,6 +74,10 @@ public class LocalFolder extends LitePalSupport {
      */
     @Column(nullable = false)
     private String fullName;
+    /**
+     * 文件夹在本地的名称
+     */
+    private String localName;
     /**
      * 对应LocalFolder.Type中的静态变量
      */
@@ -165,5 +181,13 @@ public class LocalFolder extends LitePalSupport {
 
     public void setLocalType(String localType) {
         this.localType = localType;
+    }
+
+    public String getLocalName() {
+        return localName;
+    }
+
+    public void setLocalName(String localName) {
+        this.localName = localName;
     }
 }

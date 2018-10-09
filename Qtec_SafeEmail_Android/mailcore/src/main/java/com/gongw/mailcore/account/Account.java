@@ -56,6 +56,10 @@ public class Account extends LitePalSupport {
      * 检查邮件更新的频率
      */
     private int checkFrequency;
+    /**
+     * 账户名称
+     */
+    private String localName;
 
     public long getId() {
         return id;
@@ -135,5 +139,13 @@ public class Account extends LitePalSupport {
 
     public void setCheckFrequency(int checkFrequency) {
         this.checkFrequency = checkFrequency;
+    }
+
+    public String getLocalName() {
+        return localName;
+    }
+
+    public void setLocalName(String localName) {
+        this.localName = localName;
     }
 }

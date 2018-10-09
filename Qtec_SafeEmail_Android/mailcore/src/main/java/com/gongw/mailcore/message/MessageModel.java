@@ -26,10 +26,6 @@ public class MessageModel {
      * 邮件网络资源对象，提供操作邮件服务器上的邮件资源的接口
      */
     private MessageNetResource netResource;
-    /**
-     * 分页获取邮件时，每页的邮件数量
-     */
-    private int pageSize = 20;
 
     private MessageModel(){
         localResource = MessageLocalResource.singleInstance();
@@ -54,10 +50,10 @@ public class MessageModel {
      * @throws MessagingException
      * @throws IOException
      */
-    public List<LocalMessage> getMessagesByPage(LocalFolder localFolder, int pageIndex) throws MessagingException, IOException {
+    public List<LocalMessage> getMessagesByPage(LocalFolder localFolder, int pageIndex, int pageSize) throws MessagingException, IOException {
         List<LocalMessage> messageList = localResource.getMessagesByFolderId(localFolder.getId(), pageSize, pageIndex * pageSize);
         if(messageList.size() < 1){
-            refreshMessages(localFolder, pageIndex);
+            refreshMessages(localFolder, pageIndex, pageSize);
             messageList = localResource.getMessagesByFolderId(localFolder.getId(), pageSize, pageIndex * pageSize);
         }
         for(LocalMessage localMessage : messageList){
@@ -74,24 +70,8 @@ public class MessageModel {
      * @throws MessagingException
      * @throws IOException
      */
-    public void refreshMessages(LocalFolder localFolder, int pageIndex) throws MessagingException, IOException {
-        FolderModel.singleInstance().refreshFolders(localFolder.getAccount());
-        List<LocalFolder> localFolders = FolderModel.singleInstance().getFolders(localFolder.getAccount());
-        for(LocalFolder folder : localFolders){
-            if(folder.getUrl().equals(localFolder.getUrl())){
-                localFolder = folder;
-                break;
-            }
-        }
-        int msgCount = localFolder.getMsgCount();
-        if(msgCount == 0){
-            return;
-        }
-        int start = msgCount - (pageIndex + 1) * pageSize + 1;
-        start = start < 1 ? 1 : start;
-        int end = start + pageSize - 1;
-        end = end < 1 ? msgCount : end;
-        List<LocalMessage> localMessages = netResource.fetchMessages(localFolder, start, end);
+    public void refreshMessages(LocalFolder localFolder, int pageIndex, int pageSize) throws MessagingException, IOException {
+        List<LocalMessage> localMessages = netResource.fetchMessages(localFolder, pageIndex, pageSize);
         localResource.saveOrUpdateMessages(localMessages);
     }
 
@@ -172,7 +152,7 @@ public class MessageModel {
      * @throws UnsupportedEncodingException
      * @throws MessagingException
      */
-    public void sendMessage(LocalMessage localMessage) throws UnsupportedEncodingException, MessagingException {
-        netResource.sendMessage(localMessage);
+    public void sendMessage(Account account, LocalMessage localMessage) throws UnsupportedEncodingException, MessagingException {
+        netResource.sendMessage(account, localMessage);
     }
 }

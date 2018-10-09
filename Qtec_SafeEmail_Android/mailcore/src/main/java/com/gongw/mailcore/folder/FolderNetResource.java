@@ -1,6 +1,7 @@
 package com.gongw.mailcore.folder;
 
-import com.gongw.mailcore.net.MessageFetcher;
+import com.gongw.mailcore.Mail;
+import com.gongw.mailcore.R;
 import com.gongw.mailcore.net.NetResource;
 import com.gongw.mailcore.account.Account;
 import com.sun.mail.imap.IMAPFolder;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 
 /**
  * 网络上的邮箱文件夹资源类，提供操作网络上的Folder数据的接口
@@ -34,9 +36,9 @@ public class FolderNetResource extends NetResource{
      * @throws MessagingException
      */
     public List<LocalFolder> getAllFolders(Account account) throws MessagingException {
-        MessageFetcher fetcher = getFetcher(account);
+        Store store = getStore(account);
+        Folder[] folders = store.getDefaultFolder().list();
         List<LocalFolder> localFolders = new ArrayList<>();
-        Folder[] folders = fetcher.fetchFolders();
         for(Folder folder : folders){
             //TODO:多级文件夹未处理
             if(folder.getType() == Folder.HOLDS_FOLDERS){
@@ -67,16 +69,22 @@ public class FolderNetResource extends NetResource{
         }
         if(fullName.toLowerCase().contains(LocalFolder.Type.INBOX) || attributes.toString().toLowerCase().contains(LocalFolder.Type.INBOX)){
             localFolder.setLocalType(LocalFolder.Type.INBOX);
+            localFolder.setLocalName(Mail.getAppContext().getString(R.string.inbox));
         }else if(fullName.toLowerCase().contains(LocalFolder.Type.SENT) || attributes.toString().toLowerCase().contains(LocalFolder.Type.SENT)){
             localFolder.setLocalType(LocalFolder.Type.SENT);
+            localFolder.setLocalName(Mail.getAppContext().getString(R.string.sent_mails));
         }else if(fullName.toLowerCase().contains(LocalFolder.Type.TRASH) || attributes.toString().toLowerCase().contains(LocalFolder.Type.TRASH)) {
             localFolder.setLocalType(LocalFolder.Type.TRASH);
+            localFolder.setLocalName(Mail.getAppContext().getString(R.string.deleted_mails));
         }else if(fullName.toLowerCase().contains(LocalFolder.Type.DELETED) || attributes.toString().toLowerCase().contains(LocalFolder.Type.DELETED)){
             localFolder.setLocalType(LocalFolder.Type.DELETED);
+            localFolder.setLocalName(Mail.getAppContext().getString(R.string.deleted_mails));
         }else if(fullName.toLowerCase().contains(LocalFolder.Type.JUNK) || attributes.toString().toLowerCase().contains(LocalFolder.Type.JUNK)){
             localFolder.setLocalType(LocalFolder.Type.JUNK);
+            localFolder.setLocalName(Mail.getAppContext().getString(R.string.junk_mails));
         }else if(fullName.toLowerCase().contains(LocalFolder.Type.DRAFT) || attributes.toString().toLowerCase().contains(LocalFolder.Type.DRAFT)){
             localFolder.setLocalType(LocalFolder.Type.DRAFT);
+            localFolder.setLocalName(Mail.getAppContext().getString(R.string.draft_mails));
         }
         localFolder.setMsgCount(folder.getMessageCount());
         localFolder.setNewMsgCount(folder.getNewMessageCount());

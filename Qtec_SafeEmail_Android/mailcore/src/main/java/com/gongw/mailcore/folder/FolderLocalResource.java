@@ -69,6 +69,22 @@ public class FolderLocalResource {
     }
 
     /**
+     * 根据账号id获取收件箱文件夹
+     * @param accountId 账号id
+     * @return LocalFolder
+     */
+    public LocalFolder getInboxFolder(long accountId){
+        List<LocalFolder> localFolders = getFoldersByAccountId(accountId);
+        for(LocalFolder localFolder : localFolders){
+            String localType = localFolder.getLocalType();
+            if(LocalFolder.Type.INBOX.equals(localType)){
+                return localFolder;
+            }
+        }
+        return null;
+    }
+
+    /**
      * 批量保存或修改LocalFolder到数据库
      * @param folderList LocalFolder集合
      */

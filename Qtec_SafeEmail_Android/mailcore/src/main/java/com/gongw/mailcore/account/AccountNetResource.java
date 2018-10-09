@@ -1,10 +1,8 @@
 package com.gongw.mailcore.account;
-
-import com.gongw.mailcore.net.MessageFetcher;
-import com.gongw.mailcore.net.MessageSender;
 import com.gongw.mailcore.net.NetResource;
-
 import javax.mail.MessagingException;
+import javax.mail.Store;
+import javax.mail.Transport;
 
 /**
  * 网络邮箱账号资源，并提供Account相关的网络操作接口
@@ -30,10 +28,8 @@ public class AccountNetResource extends NetResource {
      * @throws MessagingException
      */
     public void connect(Account account) throws MessagingException {
-        MessageFetcher fetcher = getFetcher(account);
-        fetcher.connect();
-        MessageSender sender = getSender(account);
-        sender.connect();
+        getStore(account);
+        getTransport(account);
     }
 
 

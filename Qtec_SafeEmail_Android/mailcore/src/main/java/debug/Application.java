@@ -1,6 +1,7 @@
 package debug;
 
 import com.gongw.common.base.BaseApplication;
+import com.gongw.mailcore.Mail;
 import com.gongw.mailcore.account.Account;
 import com.gongw.mailcore.account.AccountModel;
 
@@ -18,7 +19,7 @@ public class Application extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        LitePal.initialize(getApplicationContext());
+        Mail.init(this);
 
             Account account = new Account();
             URLName urlName = new URLName("imaps", "imap.exmail.qq.com", 993, null, "gongw@qtec.cn", "Gg147258");
