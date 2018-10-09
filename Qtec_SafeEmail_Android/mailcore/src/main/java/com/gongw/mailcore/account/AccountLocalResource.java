@@ -1,6 +1,12 @@
 package com.gongw.mailcore.account;
 
+import com.gongw.mailcore.folder.LocalFolder;
+import com.gongw.mailcore.message.LocalMessage;
+import com.gongw.mailcore.part.LocalPart;
+
 import org.litepal.LitePal;
+
+import java.io.File;
 import java.util.List;
 
 /**
@@ -34,18 +40,22 @@ public class AccountLocalResource {
      * @param id 要查询的Accoutn的id
      * @return 查询到的Account
      */
-    public Account getAccountById(int id){
+    public Account getAccountById(long id){
         return LitePal.find(Account.class, id);
     }
 
     /**
      * 根据email查询数据库中的Account信息
      * @param email 要查询的Accoutn的email
-     * @return 查询到的Account集合
+     * @return 查询到的Account
      */
-    public List<Account> getAccountsByEmail(String email){
-        return LitePal.where("email = ?", email)
+    public Account getAccountByEmail(String email){
+        List<Account> accounts = LitePal.where("email = ?", email)
                 .find(Account.class);
+        if(accounts.size() > 0){
+            return accounts.get(0);
+        }
+        return null;
     }
 
     /**
@@ -77,8 +87,41 @@ public class AccountLocalResource {
      * 根据id删除数据库中的Account
      * @param id 要删除的Account的id
      */
-    public void deleteById(int id){
-        LitePal.delete(Account.class, id);
+    public void deleteById(long id){
+        Account account =getAccountById(id);
+        if(account == null){
+            return;
+        }
+        //获取账号下的文件夹数据
+        List<LocalFolder> localFolders = LitePal.where("account_id = ?", String.valueOf(id))
+                .find(LocalFolder.class);
+        for(LocalFolder localFolder : localFolders){
+            //获取文件夹下的邮件数据
+            List<LocalMessage> localMessages = LitePal.where("localfolder_id = ?", String.valueOf(localFolder.getId()))
+                    .find(LocalMessage.class);
+            for(LocalMessage localMessage : localMessages){
+                //获取邮件相关的附件和正文等PART数据
+                List<LocalPart> localParts = LitePal.where("localmessage_id = ?", String.valueOf(localMessage.getId()))
+                        .find(LocalPart.class);
+                for(LocalPart localPart : localParts){
+                    //删除缓存的附件和正文
+                    if(localPart.getDataLocation() == LocalPart.Location.LOCATION_ON_DISK && localPart.getLocalPath() != null){
+                        File file = new File(localPart.getLocalPath());
+                        if(file.exists()){
+                            file.delete();
+                        }
+                    }
+                    //删除part数据
+                    localPart.delete();
+                }
+                //删除邮件数据
+                localMessage.delete();
+            }
+            //删除文件夹数据
+            localFolder.delete();
+        }
+        //删除账号数据
+        account.delete();
     }
 
     /**
@@ -86,13 +129,20 @@ public class AccountLocalResource {
      * @param email 要删除的Account的email
      */
     public void deleteByEmail(String email){
-        LitePal.deleteAll(Account.class, "email = ?", email);
+        Account account = getAccountByEmail(email);
+        deleteById(account.getId());
     }
 
     /**
      * 删除数据库中的所有Account
      */
     public void deleteAll(){
-        LitePal.deleteAll(Account.class);
+        List<Account> accounts = getAllAccounts();
+        if(accounts == null || accounts.size() < 1){
+            return;
+        }
+        for(Account account : accounts){
+            deleteById(account.getId());
+        }
     }
 }

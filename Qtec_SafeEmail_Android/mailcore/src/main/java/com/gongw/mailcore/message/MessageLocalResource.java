@@ -4,7 +4,11 @@ package com.gongw.mailcore.message;
 import com.gongw.mailcore.contact.Contact;
 import com.gongw.mailcore.contact.ContactModel;
 import com.gongw.mailcore.folder.LocalFolder;
+import com.gongw.mailcore.part.LocalPart;
+
 import org.litepal.LitePal;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Flags;
@@ -24,6 +28,18 @@ public class MessageLocalResource {
 
     public static MessageLocalResource singleInstance(){
         return InstanceHolder.instance;
+    }
+
+    /**
+     * 获取所有的邮件
+     * @return LocalMessage
+     */
+    public List<LocalMessage> getAllMessages(){
+        List<LocalMessage> localMessages = LitePal.findAll(LocalMessage.class);
+        for(LocalMessage localMessage : localMessages){
+            fillMessageContacts(localMessage);
+        }
+        return localMessages;
     }
 
     /**
@@ -49,6 +65,21 @@ public class MessageLocalResource {
                 .limit(limit)
                 .offset(offset)
                 .order("receiveDate desc")
+                .find(LocalMessage.class);
+
+        for(LocalMessage localMessage : messages){
+            fillMessageContacts(localMessage);
+        }
+        return messages;
+    }
+
+    /**
+     * 获取指定文件夹下的邮件
+     * @param folderId 文件夹id
+     * @return LocalMessage集合
+     */
+    public List<LocalMessage> getMessagesByFolderId(long folderId){
+        List<LocalMessage> messages = LitePal.where("localfolder_id = ?", String.valueOf(folderId))
                 .find(LocalMessage.class);
 
         for(LocalMessage localMessage : messages){
@@ -127,7 +158,26 @@ public class MessageLocalResource {
      * @param id id
      */
     public void deleteMessageById(long id){
-        LitePal.delete(LocalMessage.class, id);
+        LocalMessage localMessage = getMessageById(id);
+        if(localMessage == null){
+            return;
+        }
+        //获取邮件相关的附件和正文等PART数据
+        List<LocalPart> localParts = LitePal.where("localmessage_id = ?", String.valueOf(localMessage.getId()))
+                .find(LocalPart.class);
+        for(LocalPart localPart : localParts){
+            //删除缓存的附件和正文
+            if(localPart.getDataLocation() == LocalPart.Location.LOCATION_ON_DISK && localPart.getLocalPath() != null){
+                File file = new File(localPart.getLocalPath());
+                if(file.exists()){
+                    file.delete();
+                }
+            }
+            //删除part数据
+            localPart.delete();
+        }
+        //删除邮件数据
+        localMessage.delete();
     }
 
     /**
@@ -135,14 +185,26 @@ public class MessageLocalResource {
      * @param folderId 文件夹id
      */
     public void deleteMessagesByFolderId(long folderId){
-        LitePal.deleteAll(LocalMessage.class, "localfolder_id = ?", String.valueOf(folderId));
+        List<LocalMessage> localMessages = getMessagesByFolderId(folderId);
+        if(localMessages == null || localMessages.size() < 1){
+            return;
+        }
+        for(LocalMessage localMessage : localMessages){
+            deleteMessageById(localMessage.getId());
+        }
     }
 
     /**
      * 删除数据库中的所有邮件
      */
     public void deleteAllMessages(){
-        LitePal.deleteAll(LocalMessage.class);
+        List<LocalMessage> localMessages = getAllMessages();
+        if(localMessages == null || localMessages.size() < 1){
+            return;
+        }
+        for(LocalMessage localMessage : localMessages){
+            deleteMessageById(localMessage.getId());
+        }
     }
 
     /**

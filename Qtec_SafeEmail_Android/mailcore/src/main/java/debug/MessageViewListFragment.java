@@ -90,7 +90,7 @@ public class MessageViewListFragment extends ListFragment {
         new Thread(){
             @Override
             public void run() {
-                Account account =  AccountModel.singleInstance().getAccountsByEmail("gongw@qtec.cn").get(0);
+                Account account =  AccountModel.singleInstance().getAccountsByEmail("gongw@qtec.cn");
 
                 try {
                     List<LocalFolder> folderList = FolderModel.singleInstance().getFolders(account);

@@ -1,6 +1,8 @@
 package com.gongw.mailcore.part;
 
 import org.litepal.LitePal;
+
+import java.io.File;
 import java.util.List;
 
 /**
@@ -92,6 +94,53 @@ public class PartLocalResource {
         localPart.saveOrUpdate("localmessage_id = ? and fileName = ? and contentType = ?", String.valueOf(localPart.getLocalMessage().getId()),
                                                                                                         String.valueOf(localPart.getFileName()),
                                                                                                         localPart.getContentType());
+    }
+
+    /**
+     * 根据id号删除LocalPart数据
+     * @param id id号
+     */
+    public void deleteById(long id){
+        LocalPart localPart = LitePal.find(LocalPart.class, id);
+        if(localPart == null){
+            return;
+        }
+        //删除缓存的附件和正文
+        if(localPart.getDataLocation() == LocalPart.Location.LOCATION_ON_DISK && localPart.getLocalPath() != null){
+            File file = new File(localPart.getLocalPath());
+            if(file.exists()){
+                file.delete();
+            }
+        }
+        //删除part数据
+        localPart.delete();
+    }
+
+    /**
+     * 根据邮件id号删除LocalPart数据
+     * @param messageId 邮件id号
+     */
+    public void deleteByMessageId(long messageId){
+        List<LocalPart> localParts  = getParts(messageId);
+        if(localParts == null || localParts.size() < 1){
+            return;
+        }
+        for(LocalPart localPart : localParts){
+            deleteById(localPart.getId());
+        }
+    }
+
+    /**
+     * 删除所有LocalPart数据
+     */
+    public void deleteAll(){
+        List<LocalPart> localParts = LitePal.findAll(LocalPart.class);
+        if(localParts == null || localParts.size() < 1){
+            return;
+        }
+        for(LocalPart localPart : localParts){
+            deleteById(localPart.getId());
+        }
     }
 
 }

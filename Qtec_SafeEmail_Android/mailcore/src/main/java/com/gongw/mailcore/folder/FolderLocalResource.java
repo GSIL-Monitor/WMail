@@ -1,7 +1,11 @@
 package com.gongw.mailcore.folder;
 
 
+import com.gongw.mailcore.message.LocalMessage;
+import com.gongw.mailcore.part.LocalPart;
+
 import org.litepal.LitePal;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -23,23 +27,20 @@ public class FolderLocalResource {
     }
 
     /**
+     * 获取所有的LocalFolder数据
+     * @return LocalFolder集合
+     */
+    public List<LocalFolder> getAllFolders(){
+        return LitePal.findAll(LocalFolder.class);
+    }
+
+    /**
      * 根据账号id获取LocalFolder
      * @param accountId 账号id
      * @return LocalFolder集合
      */
     public List<LocalFolder> getFoldersByAccountId(long accountId){
         return LitePal.where("account_id = ?", String.valueOf(accountId))
-                .find(LocalFolder.class);
-    }
-
-    /**
-     * 根据账号id和LocalFolder的fullName获取LocalFolder
-     * @param accountId 账号id
-     * @param fullName 文件夹的fullName
-     * @return LocalFolder集合
-     */
-    public List<LocalFolder> getFolders(long accountId, String fullName){
-        return LitePal.where("account_id = ? and fullName = ?", String.valueOf(accountId), fullName)
                 .find(LocalFolder.class);
     }
 
@@ -85,6 +86,20 @@ public class FolderLocalResource {
     }
 
     /**
+     * 根据账号id和LocalFolder的fullName获取LocalFolder
+     * @param accountId 账号id
+     * @param fullName 名称
+     * @return LocalFolder
+     */
+    public LocalFolder getFolder(long accountId, String fullName){
+        List<LocalFolder> localFolders = LitePal.where("account_id = ? and fullName = ?", String.valueOf(accountId), fullName).find(LocalFolder.class);
+        if(localFolders.size() > 0){
+            return localFolders.get(0);
+        }
+        return null;
+    }
+
+    /**
      * 批量保存或修改LocalFolder到数据库
      * @param folderList LocalFolder集合
      */
@@ -100,7 +115,7 @@ public class FolderLocalResource {
      */
     public void saveOrUpdateFolder(LocalFolder localFolder){
         List<LocalFolder> localFolders = LitePal.where("url = ?", localFolder.getUrl())
-                                                .find(LocalFolder.class);
+                .find(LocalFolder.class);
         if(localFolders.size() < 1){
             localFolder.save();
         }else{
@@ -113,7 +128,33 @@ public class FolderLocalResource {
      * @param id id
      */
     public void deleteFolderById(long id){
-        LitePal.delete(LocalFolder.class, id);
+        LocalFolder localFolder = getFolderById(id);
+        if(localFolder == null){
+            return;
+        }
+        //获取文件夹下的邮件数据
+        List<LocalMessage> localMessages = LitePal.where("localfolder_id = ?", String.valueOf(localFolder.getId()))
+                .find(LocalMessage.class);
+        for(LocalMessage localMessage : localMessages){
+            //获取邮件相关的附件和正文等PART数据
+            List<LocalPart> localParts = LitePal.where("localmessage_id = ?", String.valueOf(localMessage.getId()))
+                    .find(LocalPart.class);
+            for(LocalPart localPart : localParts){
+                //删除缓存的附件和正文
+                if(localPart.getDataLocation() == LocalPart.Location.LOCATION_ON_DISK && localPart.getLocalPath() != null){
+                    File file = new File(localPart.getLocalPath());
+                    if(file.exists()){
+                        file.delete();
+                    }
+                }
+                //删除part数据
+                localPart.delete();
+            }
+            //删除邮件数据
+            localMessage.delete();
+        }
+        //删除文件夹数据
+        localFolder.delete();
     }
 
     /**
@@ -121,14 +162,26 @@ public class FolderLocalResource {
      * @param accountId 指定Account的id
      */
     public void deleteFoldersByAccountId(long accountId){
-        LitePal.deleteAll(LocalFolder.class, "account_id = ?", String.valueOf(accountId));
+        List<LocalFolder> localFolders = getFoldersByAccountId(accountId);
+        if(localFolders == null || localFolders.size() < 1){
+            return;
+        }
+        for(LocalFolder localFolder : localFolders){
+            deleteFolderById(localFolder.getId());
+        }
     }
 
     /**
      * 删除数据库中所有的LocalFolder数据
      */
     public void deleteAll(){
-        LitePal.deleteAll(LocalFolder.class);
+        List<LocalFolder> localFolders = getAllFolders();
+        if(localFolders == null || localFolders.size() < 1){
+            return;
+        }
+        for(LocalFolder localFolder : localFolders){
+            deleteFolderById(localFolder.getId());
+        }
     }
 
 }

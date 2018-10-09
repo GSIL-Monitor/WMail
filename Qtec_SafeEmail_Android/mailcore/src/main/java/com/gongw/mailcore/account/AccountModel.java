@@ -55,7 +55,7 @@ public class AccountModel {
      * @param id 要查询的Accoutn的id
      * @return 查询到的Account
      */
-    public Account getAccountById(int id){
+    public Account getAccountById(long id){
         return localAccountResource.getAccountById(id);
     }
 
@@ -72,8 +72,8 @@ public class AccountModel {
      * @param email 要查询的Accoutn的email
      * @return 查询到的Account集合
      */
-    public List<Account> getAccountsByEmail(String email){
-        return localAccountResource.getAccountsByEmail(email);
+    public Account getAccountsByEmail(String email){
+        return localAccountResource.getAccountByEmail(email);
     }
 
     /**

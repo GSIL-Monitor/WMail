@@ -2,7 +2,6 @@ package com.gongw.mailcore.message;
 
 import com.gongw.mailcore.net.MailSession;
 import com.gongw.mailcore.part.LocalPart;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +23,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * 用于生成一封邮件MimeMessage，一般邮件的内容结构如下：
+ * 用于生成MimeMessage邮件，邮件的内容结构如下：
  * +-------------------------  multipart/mixed  -----------------------+
  * |                                                                   |
  * |    +--------------------  multipart/related  ---------------+     |
