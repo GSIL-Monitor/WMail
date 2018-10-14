@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/title_background"
+        app:contentInsetStart="0dp">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tvLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:paddingLeft="20dp"
+            android:paddingRight="10dp"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:text="@string/cancel"/>
+
+        <RadioGroup
+            android:id="@+id/rgServer"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:padding="2dp">
+
+            <RadioButton
+                android:id="@+id/rbImap"
+                style="@style/title_radio_style"
+                android:layout_width="55dp"
+                android:text="IMAP"
+                android:checked="true"
+                />
+
+            <RadioButton
+                android:id="@+id/rbPop3"
+                android:layout_width="55dp"
+                style="@style/title_radio_style"
+                android:text="POP3"
+
+                />
+        </RadioGroup>
+
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tvRight"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="20dp"
+            android:textSize="15sp"
+            android:textColor="@android:color/white"
+            android:text="@string/complete"/>
+
+    </android.support.v7.widget.Toolbar>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#eee">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/encryptLabel"
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:gravity="center_vertical"
+                android:paddingLeft="24dp"
+                android:text="@string/qtec_safe_server"
+                android:textSize="14sp" />
+            <LinearLayout
+                android:id="@+id/encryptWrapper"
+                style="@style/item_setting_style"
+                android:background="@drawable/loggsetting_area_bg">
+
+                <TextView
+                    android:id="@+id/tvEncryptLabel"
+                    style="@style/item_text_label_style"
+                    android:layout_width="wrap_content"
+                    android:layout_weight="0"
+                    android:ems="4"
+                    android:text="@string/host_name" />
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/etEncryptAddress"
+                    style="@style/edit_logsetting_style" />
+
+                <TextView
+                    android:id="@+id/tvEncryptSuggest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:gravity="center"
+                    android:textSize="14dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/bottom_title_color_btn_bg"
+                    android:textColor="@color/title_background"
+                    android:text="@string/recommendation"/>
+            </LinearLayout>
+
+            <android.support.v7.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:gravity="center_vertical"
+                android:paddingLeft="24dp"
+                android:text="@string/receiving_server"
+                android:textSize="14sp" />
+
+
+            <include layout="@layout/receiver_sever_setting_layout"/>
+
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/appCompatTextView"
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:gravity="center_vertical"
+                android:paddingLeft="24dp"
+                android:text="@string/sending_server"
+                android:textSize="14sp" />
+
+            <include layout="@layout/sender_server_setting_layout"/>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
+</layout>

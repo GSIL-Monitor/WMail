@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">mailcore</string>
+
+    <string name="inbox">收件箱</string>
+    <string name="encrypt_mails">密文邮件</string>
+    <string name="star_mails">星标邮件</string>
+    <string name="draft_mails">草稿箱</string>
+    <string name="sent_mails">已发送</string>
+    <string name="deleted_mails">已删除</string>
+    <string name="junk_mails">垃圾箱</string>
+</resources>
